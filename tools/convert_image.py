@@ -59,10 +59,11 @@ for y in range(height // 8):
         
 output_filename = args.output_filename
 if not output_filename:
+    output_filename = os.path.splitext(os.path.split(args.input_image)[1])[0]
     if args.output_format == 'a':
-        output_filename = os.path.splitext(os.path.split(args.input_image)[1])[0] + '-masks.txt'
+         output_filename += '-masks.txt'
     else:
-        output_filename = os.path.splitext(os.path.split(args.input_image)[1])[0] + '.txt'
+        output_filename += '.txt'
 
 f = open(output_filename, 'w')
 
