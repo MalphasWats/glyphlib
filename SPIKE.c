@@ -334,7 +334,7 @@ void draw_int(int n, byte width, int x, int y)
     long n_;
     for (byte i=0 ; i<width ; i++)
     {
-        n_ = (long)(6554*n)>>16;
+        n_ = (6554*(long)n)>>16;
         draw_tile(&DIGITS[(n - (n_*10))*8], &BLOCK_MASKS[OPAQUE], x+((width-i-1)*8), y);
         n = (int)n_;
     }
