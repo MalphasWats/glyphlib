@@ -83,9 +83,7 @@ void initialise( void )
     /* Setup Display */
     initialise_oled();
     
-    for(uint8_t y=0 ; y<(LOGO.height>>3) ; y++)
-        for(uint8_t x=0 ; x<LOGO.width ; x++)
-            buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO.data[y*LOGO.width + x];
+    draw_image(&LOGO, 16, 2);
     
     draw();
     
@@ -318,6 +316,13 @@ void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t
             buffer[tile_start+SCREEN_WIDTH+tile_offset] |= tile[tile_index] >> y_offset_b;
         }
     }
+}
+
+void draw_image(const __flash Image *img, int16_t x, int16_t y)
+{
+    for(uint8_t img_y=0 ; img_y<(img->height>>3) ; img_y++)
+        for(uint8_t img_x=0 ; img_x<img->width ; img_x++)
+            buffer[(img_y+y)*SCREEN_WIDTH + (img_x+x)] = img->data[img_y*img->width + img_x];
 }
 
 void draw_string(const __memx char *string, int16_t x, int16_t y)
