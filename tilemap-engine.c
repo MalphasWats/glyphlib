@@ -2,27 +2,27 @@
 
 Viewport viewport = {.x=0, .y=0};
 
-void draw_map(const Map __memx *map, const __flash byte *tileset)
+void draw_map(const Map __memx *map, const __flash uint8_t *tileset)
 {   
-    int x = viewport.x;
-    int y = viewport.y;
-    byte x_offset = x & 7; // x % 8
+    int16_t x = viewport.x;
+    int16_t y = viewport.y;
+    uint8_t x_offset = x & 7; // x % 8
     x >>= 3;
     
-    byte y_offset = y & 7; // y % 8
+    uint8_t y_offset = y & 7; // y % 8
     y >>= 3;
     
-    byte NUM_ROWS = SCREEN_ROWS;
+    uint8_t NUM_ROWS = SCREEN_ROWS;
     if (y_offset > 0)
         NUM_ROWS += 1;
     
-    byte NUM_COLS = SCREEN_COLUMNS;
+    uint8_t NUM_COLS = SCREEN_COLUMNS;
     if (x_offset > 0)
         NUM_COLS += 1;
     
-    for (byte row=0 ; row<NUM_ROWS ; row++)
+    for (uint8_t row=0 ; row<NUM_ROWS ; row++)
     {
-        for (byte col=0 ; col<NUM_COLS ; col++)
+        for (uint8_t col=0 ; col<NUM_COLS ; col++)
         {
             draw_tile(&tileset[map->tiles[map->cols * (row+y) + (col+x)]*8], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset); 
         }

@@ -5,20 +5,20 @@
 
 #include "ASCII.h"
 
-volatile dword _millis = 0;
+volatile uint32_t _millis = 0;
 
 const __memx Tune *current_tune;
-byte current_note;
+uint8_t current_note;
 bool playing = FALSE;
 
-byte rngSEED = 5;
-byte rng( void )
+uint8_t rngSEED = 5;
+uint8_t rng( void )
 {
     rngSEED = (rngSEED*rngA +rngC) % rngM;
     return rngSEED;
 }
 
-void delay_ms( word ms )
+void delay_ms( uint16_t ms )
 {
     ms += _millis;
     if (ms<_millis)
@@ -83,8 +83,8 @@ void initialise( void )
     /* Setup Display */
     initialise_oled();
     
-    for(byte y=0 ; y<(LOGO.height>>3) ; y++)
-        for(byte x=0 ; x<LOGO.width ; x++)
+    for(uint8_t y=0 ; y<(LOGO.height>>3) ; y++)
+        for(uint8_t x=0 ; x<LOGO.width ; x++)
             buffer[(y+2)*SCREEN_WIDTH + (x+16)] = LOGO.data[y*LOGO.width + x];
     
     draw();
@@ -103,8 +103,8 @@ ISR(TIMER3_COMPA_vect)
     {
         if (current_note < current_tune->length)
         {
-            byte note_index = current_tune->score[current_note] & 0x0f;
-            byte beat_index = current_tune->score[current_note] >> 4;
+            uint8_t note_index = current_tune->score[current_note] & 0x0f;
+            uint8_t beat_index = current_tune->score[current_note] >> 4;
             OCR1A = NOTES[note_index];
             TCNT3 = 0;
             OCR3A = BEATS[beat_index] * BEAT_ATOM;
@@ -121,7 +121,7 @@ ISR(TIMER3_COMPA_vect)
     OCR1A = 0;
 }
 
-void note(byte note, word duration)
+void note(uint8_t note, uint16_t duration)
 {
     if (!playing)
     {
@@ -153,13 +153,13 @@ void stop_tune()
     }
 }
 
-dword millis( void )
+uint32_t millis( void )
 {
     return _millis;
 }
 
 /* OLED Functions */
-void shift_out_byte(byte b)
+void shift_out_byte(uint8_t b)
 {
     while( !( UCSR0A & (1<<UDRE0) ) );
     UDR0 = b;
@@ -231,13 +231,13 @@ void initialise_oled(void)
 
 void clear_buffer(void)
 {
-    for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
+    for (uint16_t i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
         buffer[i] = 0x00;
 }
 
 void draw( void )
 {
-    for (word i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
+    for (uint16_t i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)
         shift_out_byte(buffer[i]);
 }
 
@@ -257,30 +257,30 @@ void display_on(void)
     PORTB |= 1 << DC;           // DATA
 }
 
-void draw_pixel(int x, int y)
+void draw_pixel(int16_t x, int16_t y)
 {
     buffer[ (y>>3) * SCREEN_WIDTH + x ] |= 1 << (y&7);
 }
 
-void draw_tile(const byte __flash *tile, const byte __flash *mask, int x, int y)
+void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t x, int16_t y)
 {
     /* is the tile actually visible */
     if (x < -7 || x >= SCREEN_WIDTH || y < -7 || y >= SCREEN_HEIGHT)
         return;
     
     
-    int y_ = y;
+    int16_t y_ = y;
     
     if (y < 0)
         y_ = 0-y;
         
-    int tile_start = ((y_ >> 3) * SCREEN_WIDTH) + x;
+    int16_t tile_start = ((y_ >> 3) * SCREEN_WIDTH) + x;
     
-    byte y_offset_a = y & 7; // y % 8
-    byte y_offset_b = 8-y_offset_a;
+    uint8_t y_offset_a = y & 7; // y % 8
+    uint8_t y_offset_b = 8-y_offset_a;
     
-    byte tile_index = 0;
-    byte tile_width = 8;
+    uint8_t tile_index = 0;
+    uint8_t tile_width = 8;
     if (x < 0)
     {
         tile_start -= x;
@@ -305,7 +305,7 @@ void draw_tile(const byte __flash *tile, const byte __flash *mask, int x, int y)
         y_offset_b = 8;
     }
     
-    for(byte tile_offset=0 ; tile_offset<tile_width ; tile_offset++, tile_index++)
+    for(uint8_t tile_offset=0 ; tile_offset<tile_width ; tile_offset++, tile_index++)
     {
         if (y_offset_a < 8)
         {
@@ -320,23 +320,23 @@ void draw_tile(const byte __flash *tile, const byte __flash *mask, int x, int y)
     }
 }
 
-void draw_string(const __memx char *string, int x, int y)
+void draw_string(const __memx char *string, int16_t x, int16_t y)
 {
-    for(byte i=0 ; string[i] != '\0' ; i++)
+    for(uint8_t i=0 ; string[i] != '\0' ; i++)
     {
         draw_tile(&ASCII[(string[i]-32)*8], &BLOCK_MASKS[OPAQUE], x+(i*8), y);
     }
 }
 
-void draw_int(int n, byte width, int x, int y)
+void draw_int(int16_t n, uint8_t width, int16_t x, int16_t y)
 {
     //TODO: Negative numbers
-    long n_;
-    for (byte i=0 ; i<width ; i++)
+    int32_t n_;
+    for (uint8_t i=0 ; i<width ; i++)
     {
-        n_ = (6554*(long)n)>>16;
+        n_ = (6554*(int32_t)n)>>16;
         draw_tile(&DIGITS[(n - (n_*10))*8], &BLOCK_MASKS[OPAQUE], x+((width-i-1)*8), y);
-        n = (int)n_;
+        n = (int16_t)n_;
     }
 }
 

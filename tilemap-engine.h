@@ -4,26 +4,26 @@
 #include "SPIKE.h"
 
 typedef struct Sprite {
-    int x;
-    int y;
+    int16_t x;
+    int16_t y;
     
-    const byte __flash *tile;
-    const byte __flash *mask;
+    const uint8_t __flash *tile;
+    const uint8_t __flash *mask;
 } Sprite;
 
 typedef struct Map {
-    word cols;
-    word rows;
-    byte tileset;
-    byte tiles[];
+    uint16_t cols;
+    uint16_t rows;
+    uint8_t tileset;
+    uint8_t tiles[];
 } Map;
 
 typedef struct Viewport {
-    int x;
-    int y;
+    int16_t x;
+    int16_t y;
 } Viewport;
 
-void draw_map(const Map __memx *map, const __flash byte *tileset);
+void draw_map(const Map __memx *map, const __flash uint8_t *tileset);
 void draw_sprite(Sprite *s);
 
 void center_on_sprite(Sprite *s, const Map __memx *map);

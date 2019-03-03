@@ -4,16 +4,16 @@
 #include "GLYPH.h"
 
 typedef struct Sprite {
-    int x;
-    int y;
+    int16_t x;
+    int16_t y;
     
-    const byte __memx *tile;
+    const uint8_t __memx *tile;
 } Sprite;
 
 typedef struct Map {
-    word cols;
-    word rows;
-    byte tiles[];
+    uint16_t cols;
+    uint16_t rows;
+    uint8_t tiles[];
 } Map;
 
 /*typedef struct Image {
@@ -23,16 +23,16 @@ typedef struct Map {
 } Image;*/
 
 typedef struct Viewport {
-    int x;
-    int y;
+    int16_t x;
+    int16_t y;
 } Viewport;
 
-void draw_image(const Image __flash *image, int x, int y);
+void draw_image(const Image __flash *image, int16_t x, int16_t y);
 void draw_map(const Map __memx *map, const __flash Image *tileset[]);
 void draw_sprite(Sprite *s);
-bool visible(const Image __flash *image, int x, int y);
+bool visible(const Image __flash *image, int16_t x, int16_t y);
 
-void set_viewport(int x, int y);
+void set_viewport(int16_t x, int16_t y);
 
 void center_on_sprite(Sprite *s, Map *map);
 

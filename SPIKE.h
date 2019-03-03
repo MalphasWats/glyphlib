@@ -61,14 +61,11 @@
 
 #define NOTE_DURATION_MULTIPLIER 15    // 1ms
 
-typedef unsigned char byte;
-typedef unsigned int word;
-typedef unsigned long dword;
 typedef unsigned char bool;
 
 // http://www.soundoctor.com/freq.htm
 //  OCR1A       FREQ.(Hz)   Note        
-static const __flash word NOTES[] = {
+static const __flash uint16_t NOTES[] = {
     0,
     2273,       // 440,     Concert A(4)
     2146,       // 466,     Bb(4)         
@@ -110,7 +107,7 @@ static const __flash word NOTES[] = {
 #define _A8     16  
 #define _A9     17   
 
-static const __flash byte BEATS[8] = {
+static const __flash uint8_t BEATS[8] = {
     64,     // SEMIBREVE
     48,     // DOTTED MINIM
     32,     // MINIM
@@ -134,8 +131,8 @@ static const __flash byte BEATS[8] = {
 #define BEAT_ATOM 8 * 4 * NOTE_DURATION_MULTIPLIER   // 32 Milliseconds
 
 typedef struct Tune {
-    word length;
-    byte score[];
+    uint16_t length;
+    uint8_t score[];
 } Tune;
 
 static const __flash Tune STARTUP_CHIME = {
@@ -146,12 +143,12 @@ static const __flash Tune STARTUP_CHIME = {
 };
 
 
-byte buffer[SCREEN_WIDTH * SCREEN_ROWS];
+uint8_t buffer[SCREEN_WIDTH * SCREEN_ROWS];
 
 typedef struct Image {
-    byte height;
-    byte width;
-    byte data[];
+    uint8_t height;
+    uint8_t width;
+    uint8_t data[];
 } Image;
 
 //TODO: UPDATE TO GLYPH
@@ -165,7 +162,7 @@ static const __flash Image LOGO = {
     },
 };
 
-static const __flash byte BLOCK_MASKS[] = {
+static const __flash uint8_t BLOCK_MASKS[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 };
@@ -176,18 +173,18 @@ static const __flash byte BLOCK_MASKS[] = {
 #define rngM 251
 #define rngA 11
 #define rngC 3
-byte rng( void );
+uint8_t rng( void );
 
-void delay_ms( word ms );
+void delay_ms( uint16_t ms );
 
 // http://www.oz4.us/2015/12/recoding-bare-millis-clock-on-avr.html
 // https://github.com/sourceperl/millis/blob/master/millis.c
 // https://www.avrfreaks.net/forum/tut-c-newbies-guide-avr-timers?page=all
 void initialise( void );
-dword millis( void );
+uint32_t millis( void );
 
 /* OLED Function */
-void shift_out_byte(byte val);
+void shift_out_byte(uint8_t val);
 
 void initialise_oled(void);
 void clear_buffer(void);
@@ -198,12 +195,12 @@ void display_on(void);
 
 /* Draw Functions */
 
-void draw_pixel(int x, int y);
-void draw_tile(const byte __flash *glyph, const byte __flash *mask, int x, int y);
-void draw_string(const __memx char *string, int x, int y);
-void draw_int(int n, byte width, int x, int y);
+void draw_pixel(int16_t x, int16_t y);
+void draw_tile(const uint8_t __flash *glyph, const uint8_t __flash *mask, int16_t x, int16_t y);
+void draw_string(const __memx char *string, int16_t x, int16_t y);
+void draw_int(int n, uint8_t width, int16_t x, int16_t y);
 
-void note(byte note, word dur);
+void note(uint8_t note, uint16_t dur);
 void click( void );
 
 void play_tune(const __memx Tune *t);
