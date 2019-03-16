@@ -2,7 +2,7 @@
 
 Viewport viewport = {.x=0, .y=0};
 
-void draw_map(const Map __memx *map, const __flash uint8_t *tileset)
+void draw_map(const Map __memx *map)
 {   
     int16_t x = viewport.x;
     int16_t y = viewport.y;
@@ -24,14 +24,25 @@ void draw_map(const Map __memx *map, const __flash uint8_t *tileset)
     {
         for (uint8_t col=0 ; col<NUM_COLS ; col++)
         {
-            draw_tile(&tileset[map->tiles[map->cols * (row+y) + (col+x)]*8], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset); 
+            draw_tile(&map->tileset[map->tiles[map->cols * (row+y) + (col+x)]*8], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset); 
         }
     }
 }
 
 void draw_sprite(Sprite *s)
 {
-    draw_tile(s->tile, s->mask, s->x-viewport.x, s->y-viewport.y);
+    uint16_t x = s->x - (s->width>>1);
+    uint16_t y = s->y - (s->height>>1);
+    
+    for(uint8_t rows=0 ; rows<(s->height>>3) ; rows++)
+    {
+        for(uint8_t cols=0 ; cols<(s->width>>3) ; cols++)
+        {
+            draw_tile(s->tile + cols*8 + rows*s->width, s->mask, (x+(cols*8))-viewport.x, (y+(rows*8))-viewport.y);
+        }
+    }
+    
+    //draw_tile(s->tile, s->mask, s->x-viewport.x, s->y-viewport.y);
 }
 
 void center_on_sprite(Sprite *s, const Map __memx *map)
