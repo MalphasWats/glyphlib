@@ -213,4 +213,10 @@ void click( void );
 void play_tune(const __memx Tune *t);
 void stop_tune();
 
+/* LEDs */
+
+typedef enum { BOTH, LEFT, RIGHT } LED;
+
+void set_LED_brightness(LED led, uint8_t value);
+
 #endif

@@ -1,7 +1,7 @@
 #ifndef TILEMAP_ENGINE_H
 #define TILEMAP_ENGINE_H
 
-#include "SPIKE.h"
+#include "GLYPH.h"
 
 typedef struct Sprite {
     int16_t x;

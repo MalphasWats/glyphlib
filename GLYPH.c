@@ -66,6 +66,13 @@ void initialise( void )
     
     OCR3A = 0;
     
+    /* Configure LED PWM Timers */
+    TCCR2A = 0b11110011;
+    TCCR2B = 0b00000111;
+    
+    OCR2A = 255;
+    OCR2B = 255;
+    
     
     /* Configure Harware SPI
        USCZ01 = UDORD0 = 0 (MSBFIRST)
@@ -351,4 +358,18 @@ void draw_int(int16_t n, uint8_t width, int16_t x, int16_t y)
 void click( void )
 {
     note(_C5, 15);
+}
+
+/* LEDs */
+void set_LED_brightness(LED led, uint8_t value)
+{
+    if (led == LEFT)
+        OCR2B = 255-value;
+    else if (led == RIGHT)
+        OCR2A = 255-value;
+    else 
+    {
+        OCR2A = 255-value;
+        OCR2B = 255-value;
+    }
 }
