@@ -42,14 +42,32 @@ void initialise( void )
     PORTD = 0x00;
     
     /* Initialise "millis" Timer */
-    TCCR0A = 0x02;          // OC0A disconnected, CTC Mode.
-    TCCR0B = 0x03;          // 1/64 CLK Prescale.
+	
+	/* TCCR0A
+	    7        6        5        4        3        2        1        0    
+	.--------.--------.--------.--------.--------.--------.--------.--------.
+	| COM0A1 | COM0A0 | COM0B1 | COM0B0 |        |        | WGM01  | WGM00  |
+	'--------'--------'--------'--------'--------'--------'--------'--------' */
+    TCCR0A = (1 << WGM01);  // OC0A disconnected, CTC Mode.
+	
+	/* TCCR0B
+	    7        6        5        4       3         2        1        0    
+	.--------.--------.--------.--------.--------.--------------------------.
+	| FOC0A  | FOC0B  |        |        | WGM02  |          CS0[2:0]        |
+	'--------'--------'--------'--------'--------'--------------------------' */
+    TCCR0B = (1 << CS1) | (1 << CS0);  // 1/64 CLK Prescale.
     
                  //                     F_CPU   Prescale  Timer frequency (1 ms)
     OCR0A = 125; // Set compare value (8000000Hz / 64) / 1000Hz
     //OCR0A = 250; // Set compare value (16000000Hz / 64) / 1000Hz
     
-    TIMSK0 |= 0x02;         // Enable OCR0A Compare Interrupt
+	
+	/* TIMSK0
+	    7        6        5        4        3        2        1        0    
+	.--------.--------.--------.--------.--------.--------.--------.--------.
+	|        |        |        |        |        | OCIEB  | OCIEA  | TOIE   |
+	'--------'--------'--------'--------'--------'--------'--------'--------' */
+    TIMSK0 = (1 << OCIEA) ;  // Enable OCR0A Compare Interrupt
     
     /* Configure sound timers */
     //TODO: Use Proper bit names
