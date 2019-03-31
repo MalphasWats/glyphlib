@@ -42,32 +42,33 @@ void initialise( void )
     PORTD = 0x00;
     
     /* Initialise "millis" Timer */
-	
-	/* TCCR0A
-	    7        6        5        4        3        2        1        0    
-	.--------.--------.--------.--------.--------.--------.--------.--------.
-	| COM0A1 | COM0A0 | COM0B1 | COM0B0 |        |        | WGM01  | WGM00  |
-	'--------'--------'--------'--------'--------'--------'--------'--------' */
-    TCCR0A = (1 << WGM01);  // OC0A disconnected, CTC Mode.
-	
-	/* TCCR0B
-	    7        6        5        4       3         2        1        0    
-	.--------.--------.--------.--------.--------.--------------------------.
-	| FOC0A  | FOC0B  |        |        | WGM02  |          CS0[2:0]        |
-	'--------'--------'--------'--------'--------'--------------------------' */
-    TCCR0B = (1 << CS1) | (1 << CS0);  // 1/64 CLK Prescale.
+    
+    /* TCCR0A
+        7        6        5        4        3        2        1        0    
+    .--------.--------.--------.--------.--------.--------.--------.--------.
+    | COM0A1 | COM0A0 | COM0B1 | COM0B0 |        |        | WGM01  | WGM00  |
+    '--------'--------'--------'--------'--------'--------'--------'--------' */
+    TCCR0A = 0b00000010;  // OC0A disconnected, CTC Mode.
+    
+    /* TCCR0B
+        7        6        5        4       3         2        1        0    
+    .--------.--------.--------.--------.--------.--------------------------.
+    | FOC0A  | FOC0B  |        |        | WGM02  |          CS0[2:0]        |
+    '--------'--------'--------'--------'--------'--------------------------' */
+    TCCR0B = 0b00000100;  // 1/256 CLK Prescale.
     
                  //                     F_CPU   Prescale  Timer frequency (1 ms)
-    OCR0A = 125; // Set compare value (8000000Hz / 64) / 1000Hz
+    //OCR0A = 125; // Set compare value (8000000Hz / 64) / 1000Hz
     //OCR0A = 250; // Set compare value (16000000Hz / 64) / 1000Hz
+    OCR0A = 78; // Set compare value (20000000Hz / 256) / 1000Hz = 78.125
     
-	
-	/* TIMSK0
-	    7        6        5        4        3        2        1        0    
-	.--------.--------.--------.--------.--------.--------.--------.--------.
-	|        |        |        |        |        | OCIEB  | OCIEA  | TOIE   |
-	'--------'--------'--------'--------'--------'--------'--------'--------' */
-    TIMSK0 = (1 << OCIEA) ;  // Enable OCR0A Compare Interrupt
+    
+    /* TIMSK0
+        7        6        5        4        3        2        1        0    
+    .--------.--------.--------.--------.--------.--------.--------.--------.
+    |        |        |        |        |        | OCIEB  | OCIEA  | TOIE   |
+    '--------'--------'--------'--------'--------'--------'--------'--------' */
+    TIMSK0 = 0b00000010 ;  // Enable OCR0A Compare Interrupt
     
     /* Configure sound timers */
     //TODO: Use Proper bit names
@@ -91,6 +92,21 @@ void initialise( void )
     OCR2A = 255;
     OCR2B = 255;
     
+    /* Configure ADC */
+    /* ADMUX
+        7        6        5        4        3        2        1        0    
+    .--------.--------.--------.--------.--------.--------.--------.--------.
+    | REFS1  | REFS0  | ADLAR  |  MUX4  |  MUX3  |  MUX2  |  MUX1  |  MUX0  |
+    '--------'--------'--------'--------'--------'--------'--------'--------' */
+    ADMUX = 0b00000111;     // BATMON connected to PA7
+    
+    /* ADCSRA
+        7        6        5        4        3        2        1        0    
+    .--------.--------.--------.--------.--------.--------.--------.--------.
+    |  ADEN  |  ADSC  | ADATE  |  ADIF  |  ADIE  | ADPS2  | ADPS1  | ADPS0  |
+    '--------'--------'--------'--------'--------'--------'--------'--------' */
+    ADCSRA = 0b11100111;    // Enable ADC; Start in free-running mode; Set Prescale to 128
+    
     
     /* Configure Harware SPI
        USCZ01 = UDORD0 = 0 (MSBFIRST)
@@ -110,10 +126,13 @@ void initialise( void )
     initialise_oled();
     
     draw_image(&LOGO, 16, 2);
-    
     draw();
-    
     delay_ms(SPLASH_DELAY);
+    
+    /* Get Battery Voltage */
+    draw_battery();
+    draw();
+    delay_ms(BATTERY_DELAY);
 }
 
 ISR(TIMER0_COMPA_vect)
@@ -376,6 +395,30 @@ void draw_int(int16_t n, uint8_t width, int16_t x, int16_t y)
 void click( void )
 {
     note(_C5, 15);
+}
+
+/* Battery */
+// 3.76v = ~585
+// 3.90v = ~612
+// 4.17v = ~647 (charging)
+void draw_battery()
+{
+    //ADCSRA |= (1 << ADSC);        // Start Conversion
+    //while(ADCSRA & (1<<ADSC));  // Wait for conversion
+    
+    uint8_t  l = ADCL;
+    uint8_t  h = ADCH;
+    uint16_t voltage = (h << 8) | l;
+    //uint8_t* glyph;
+    
+    if (voltage >= 645)
+        draw_tile(&BATTERY_GLYPHS[BAT_CHG], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+    else if (voltage >= 610)
+        draw_tile(&BATTERY_GLYPHS[BAT_FUL], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+    else if (voltage >= 570)
+        draw_tile(&BATTERY_GLYPHS[BAT_FUL-1], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+    else //TODO: map values
+        draw_int(voltage, 3, 13*8, 0);
 }
 
 /* LEDs */

@@ -3,8 +3,7 @@
 
 #include <avr/io.h>
 
-//TODO: Temporary hardware issue
-#define F_CPU 8000000
+#define F_CPU 20000000
 
 #define ever ;;
 
@@ -55,6 +54,7 @@
 #define BATMON_PIN  7   // PORTA
 
 #define SPLASH_DELAY    1500
+#define BATTERY_DELAY   500
 
 
 #define SCREEN_WIDTH    128
@@ -66,7 +66,7 @@
 #define SCREEN_COLUMNS  16
 #define SCREEN_ROWS     8
 
-#define NOTE_DURATION_MULTIPLIER 7  //15    // 1ms
+#define NOTE_DURATION_MULTIPLIER 18    // ~1ms
 
 typedef unsigned char bool;
 
@@ -173,8 +173,26 @@ static const __flash uint8_t BLOCK_MASKS[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 };
 
+
 #define OPAQUE      0
 #define TRANSPARENT 8
+
+static const __flash uint8_t BATTERY_GLYPHS[] = {
+    0x42, 0x2a, 0x22, 0x2a, 0x42, 0x02, 0x3c, 0x18, // SAD
+    0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3c, 0x18, // EMPTY
+    0x7e, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3c, 0x18, 
+    0x7e, 0x7e, 0x42, 0x42, 0x42, 0x42, 0x3c, 0x18, 
+    0x7e, 0x7e, 0x7e, 0x42, 0x42, 0x42, 0x3c, 0x18, 
+    0x7e, 0x7e, 0x7e, 0x7e, 0x42, 0x42, 0x3c, 0x18, 
+    0x7e, 0x7e, 0x7e, 0x7e, 0x7e, 0x42, 0x3c, 0x18, //FULL
+    0x7e, 0x66, 0x66, 0x42, 0x5a, 0x7e, 0x3c, 0x18, //CHARGING
+};
+
+#define BAT_CHG 7*8
+#define BAT_FUL 6*8
+#define BAT_EMT 1*8
+#define BAT_SAD 0*8
+
 
 #define rngM 251
 #define rngA 11
@@ -212,6 +230,8 @@ void click( void );
 
 void play_tune(const __memx Tune *t);
 void stop_tune();
+
+void draw_battery();
 
 /* LEDs */
 
