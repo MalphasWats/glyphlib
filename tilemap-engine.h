@@ -31,4 +31,6 @@ void draw_sprite(Sprite *s);
 
 void center_on_sprite(Sprite *s, const Map __memx *map);
 
+uint8_t tile_at_xy(const __memx Map* m, uint16_t x, uint16_t y);
+
 #endif

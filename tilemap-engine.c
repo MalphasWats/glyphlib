@@ -61,3 +61,8 @@ void center_on_sprite(Sprite *s, const Map __memx *map)
         viewport.y = map->rows*8 - SCREEN_HEIGHT;    
     
 }
+
+uint8_t tile_at_xy(const __memx Map* m, uint16_t x, uint16_t y)
+{
+    return m->tiles[ (y>>3) * m->cols + (x>>3) ];
+}
