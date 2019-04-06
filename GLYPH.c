@@ -18,7 +18,7 @@ uint8_t rng( void )
     return rngSEED;
 }
 
-void delay_ms( uint16_t ms )
+void delay_ms( uint32_t ms )
 {
     ms += _millis;
     if (ms<_millis)
@@ -35,79 +35,79 @@ void initialise( void )
     /* Configure Outputs */
     //DDRA
     DDRB = (1<<CS) | (1<<DC) | (1<<RST) | (1<<SCK);
-    
+
     PORTC = 0xFF; // Set pull-up resistors
-    
+
     DDRD = (1 << SNDA) | (1 << SNDB) | (1<<MOSI) | (1 << LED_1_PIN) | (1 << LED_2_PIN);
     PORTD = 0x00;
-    
+
     /* Initialise "millis" Timer */
-    
+
     /* TCCR0A
-        7        6        5        4        3        2        1        0    
+        7        6        5        4        3        2        1        0
     .--------.--------.--------.--------.--------.--------.--------.--------.
     | COM0A1 | COM0A0 | COM0B1 | COM0B0 |        |        | WGM01  | WGM00  |
     '--------'--------'--------'--------'--------'--------'--------'--------' */
     TCCR0A = 0b00000010;  // OC0A disconnected, CTC Mode.
-    
+
     /* TCCR0B
-        7        6        5        4       3         2        1        0    
+        7        6        5        4       3         2        1        0
     .--------.--------.--------.--------.--------.--------------------------.
     | FOC0A  | FOC0B  |        |        | WGM02  |          CS0[2:0]        |
     '--------'--------'--------'--------'--------'--------------------------' */
     TCCR0B = 0b00000100;  // 1/256 CLK Prescale.
-    
+
                  //                     F_CPU   Prescale  Timer frequency (1 ms)
     //OCR0A = 125; // Set compare value (8000000Hz / 64) / 1000Hz
     //OCR0A = 250; // Set compare value (16000000Hz / 64) / 1000Hz
     OCR0A = 78; // Set compare value (20000000Hz / 256) / 1000Hz = 78.125
-    
-    
+
+
     /* TIMSK0
-        7        6        5        4        3        2        1        0    
+        7        6        5        4        3        2        1        0
     .--------.--------.--------.--------.--------.--------.--------.--------.
     |        |        |        |        |        | OCIEB  | OCIEA  | TOIE   |
     '--------'--------'--------'--------'--------'--------'--------'--------' */
     TIMSK0 = 0b00000010 ;  // Enable OCR0A Compare Interrupt
-    
+
     /* Configure sound timers */
     //TODO: Use Proper bit names
     TCCR1A = 0b01000001;    // phase correct pwm mode
     TCCR1B = 0b00010010;    // 1/8 Prescale
-    
+
     OCR1A = 0;
 
-    
+
     TCCR3A = 0b00000000;
     TCCR3B = 0b00001101;    // CTC Mode, 1/1024 prescale
-    
+
     TIMSK3 = 0x02;
-    
+
     OCR3A = 0;
-    
+
     /* Configure LED PWM Timers */
     TCCR2A = 0b11110011;
     TCCR2B = 0b00000111;
-    
+
     OCR2A = 255;
     OCR2B = 255;
-    
+
     /* Configure ADC */
     /* ADMUX
-        7        6        5        4        3        2        1        0    
+        7        6        5        4        3        2        1        0
     .--------.--------.--------.--------.--------.--------.--------.--------.
     | REFS1  | REFS0  | ADLAR  |  MUX4  |  MUX3  |  MUX2  |  MUX1  |  MUX0  |
     '--------'--------'--------'--------'--------'--------'--------'--------' */
     ADMUX = 0b00000111;     // BATMON connected to PA7
-    
+
     /* ADCSRA
-        7        6        5        4        3        2        1        0    
+        7        6        5        4        3        2        1        0
     .--------.--------.--------.--------.--------.--------.--------.--------.
     |  ADEN  |  ADSC  | ADATE  |  ADIF  |  ADIE  | ADPS2  | ADPS1  | ADPS0  |
     '--------'--------'--------'--------'--------'--------'--------'--------' */
     ADCSRA = 0b11100111;    // Enable ADC; Start in free-running mode; Set Prescale to 128
-    
-    
+
+
     /* Configure Harware SPI
        USCZ01 = UDORD0 = 0 (MSBFIRST)
        UCSZ00 = UCPHA0 = 0 (SPI MODE 0)
@@ -115,20 +115,20 @@ void initialise( void )
     UBRR0 = 0; // MAXIMUM BAUD RATE
     UCSR0C = (1<<UMSEL01) | (1<<UMSEL00) | (0<<UCSZ01) | (0<<UCSZ00) | (0<<UCPOL0);
     UCSR0B = (0<<RXEN0) | (1<<TXEN0);
-    
+
     UBRR0 = 0; // MAXIMUM BAUD RATE
-    
+
     sei();                  // Enable interrupts
-    
+
     play_tune(&STARTUP_CHIME);
-    
+
     /* Setup Display */
     initialise_oled();
-    
+
     draw_image(&LOGO, 16, 2);
     draw();
     delay_ms(SPLASH_DELAY);
-    
+
     /* Get Battery Voltage */
     draw_battery();
     draw();
@@ -159,7 +159,7 @@ ISR(TIMER3_COMPA_vect)
             playing = FALSE;
         }
     }
-    
+
     OCR3A = 0;
     OCR1A = 0;
 }
@@ -213,16 +213,16 @@ void initialise_oled(void)
 {
     PORTB &= ~(1 << CS);                // LOW (Enabled)
     PORTB &= ~(1 << DC);                // LOW (Command Mode)
-    
+
     PORTB |= 1 << RST;          // HIGH
     delay_ms(10);
     PORTB &= ~(1 << RST);       // LOW
     delay_ms(10);
     PORTB |= 1 << RST;          // HIGH
     delay_ms(10);
-    
+
     shift_out_byte(0xAE);               // DISPLAYOFF
-    
+
     shift_out_byte(0xD5);               // SETDISPLAYCLOCKDIV
     shift_out_byte(0x80);               // the suggested ratio 0x80
 
@@ -232,10 +232,10 @@ void initialise_oled(void)
     shift_out_byte(0xD3 );              // SETDISPLAYOFFSET
     shift_out_byte(0x0);                // no offset
     shift_out_byte(0x40  | 0x0);        // SETSTARTLINE line #0
-  
+
     shift_out_byte(0x8D);               // CHARGEPUMP
     shift_out_byte(0x14);               // Not External Vcc
-  
+
     shift_out_byte(0x20 );              // MEMORYMODE
     shift_out_byte(0x00);               // 0x0 act like ks0108
     shift_out_byte(0xA0  | 0x1);        // SEGREMAP
@@ -244,28 +244,28 @@ void initialise_oled(void)
 
     shift_out_byte(0xDA);               // SETCOMPINS
     shift_out_byte(0x12);
-  
+
     shift_out_byte(0x81 );              // SETCONTRAST
     shift_out_byte(0xCF);               // Not External Vcc
 
 
     shift_out_byte(0xD9 );              // SETPRECHARGE
     shift_out_byte(0xF1);               // Not External Vcc
-  
+
     shift_out_byte(0xDB);               // SETVCOMDETECT
     shift_out_byte(0x40);
-  
+
     shift_out_byte(0xA4 );              // DISPLAYALLON_RESUME
     shift_out_byte(0xA6 );              // NORMALDISPLAY
 
     //shift_out_byte(0x2E );            // DEACTIVATE_SCROLL
 
     shift_out_byte(0xAF);               // DISPLAYON
-    
+
     shift_out_byte(0xB0 + 0);           // PAGEADDR (0 = reset)
     shift_out_byte(0 & 0x0F);           // Column start address (0 = reset)
     shift_out_byte(0x10 | (0 >> 4));    // LOW COL ADDR
-    
+
     PORTB |= 1 << CS;                   // HIGH (Disabled)
     PORTB |= 1 << DC;                   // DATA
     delay_ms(1);
@@ -288,7 +288,7 @@ void display_off(void)
 {
     PORTB &= ~(1 << DC);        // COMMAND
     shift_out_byte(0xAE);       // DISPLAYOFF
-    
+
     PORTB |= 1 << DC;           // DATA
 }
 
@@ -296,7 +296,7 @@ void display_on(void)
 {
     PORTB &= ~(1 << DC);        // COMMAND
     shift_out_byte(0xAF);       // DISPLAYON
-    
+
     PORTB |= 1 << DC;           // DATA
 }
 
@@ -310,18 +310,18 @@ void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t
     /* is the tile actually visible */
     if (x < -7 || x >= SCREEN_WIDTH || y < -7 || y >= SCREEN_HEIGHT)
         return;
-    
-    
+
+
     int16_t y_ = y;
-    
+
     if (y < 0)
         y_ = 0-y;
-        
+
     int16_t tile_start = ((y_ >> 3) * SCREEN_WIDTH) + x;
-    
+
     uint8_t y_offset_a = y & 7; // y % 8
     uint8_t y_offset_b = 8-y_offset_a;
-    
+
     uint8_t tile_index = 0;
     uint8_t tile_width = 8;
     if (x < 0)
@@ -330,24 +330,24 @@ void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t
         tile_index = 0-x;
         tile_width -= tile_index;
     }
-    
+
     if (x > SCREEN_WIDTH-8)
     {
         tile_width = SCREEN_WIDTH-x;
     }
-    
+
     if (y < 0)
     {
         y_offset_a = 8;
         y_offset_b = 0-y;
         tile_start -= SCREEN_WIDTH;
     }
-    
+
     if (y > SCREEN_HEIGHT-8)
     {
         y_offset_b = 8;
     }
-    
+
     for(uint8_t tile_offset=0 ; tile_offset<tile_width ; tile_offset++, tile_index++)
     {
         if (y_offset_a < 8)
@@ -405,12 +405,12 @@ void draw_battery()
 {
     //ADCSRA |= (1 << ADSC);        // Start Conversion
     //while(ADCSRA & (1<<ADSC));  // Wait for conversion
-    
+
     uint8_t  l = ADCL;
     uint8_t  h = ADCH;
     uint16_t voltage = (h << 8) | l;
     //uint8_t* glyph;
-    
+
     if (voltage >= 645)
         draw_tile(&BATTERY_GLYPHS[BAT_CHG], &BLOCK_MASKS[OPAQUE], 15*8, 0);
     else if (voltage >= 610)
@@ -428,7 +428,7 @@ void set_LED_brightness(LED led, uint8_t value)
         OCR2B = 255-value;
     else if (led == RIGHT)
         OCR2A = 255-value;
-    else 
+    else
     {
         OCR2A = 255-value;
         OCR2B = 255-value;
