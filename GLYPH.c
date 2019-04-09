@@ -284,22 +284,6 @@ void draw( void )
         shift_out_byte(buffer[i]);
 }
 
-void display_off(void)
-{
-    PORTB &= ~(1 << DC);        // COMMAND
-    shift_out_byte(0xAE);       // DISPLAYOFF
-
-    PORTB |= 1 << DC;           // DATA
-}
-
-void display_on(void)
-{
-    PORTB &= ~(1 << DC);        // COMMAND
-    shift_out_byte(0xAF);       // DISPLAYON
-
-    PORTB |= 1 << DC;           // DATA
-}
-
 void draw_pixel(int16_t x, int16_t y)
 {
     buffer[ (y>>3) * SCREEN_WIDTH + x ] |= 1 << (y&7);
