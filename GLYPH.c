@@ -272,6 +272,17 @@ void initialise_oled(void)
     PORTB &= ~(1 << CS);                // LOW (Enabled)
 }
 
+void display_mode(mode_t mode)
+{
+    PORTB &= ~(1 << DC);                // LOW (Command Mode)
+    if (mode == INVERTED)
+        shift_out_byte(0xA7 );
+    else
+        shift_out_byte(0xA6 );
+    delay_ms(1);
+    PORTB |= 1 << DC;                   // DATA
+}
+
 void clear_buffer(void)
 {
     for (uint16_t i=0 ; i<SCREEN_WIDTH*SCREEN_ROWS ; i++)

@@ -211,6 +211,10 @@ uint32_t millis( void );
 void shift_out_byte(uint8_t val);
 
 void initialise_oled(void);
+
+typedef enum { NORMAL, INVERTED } mode_t;
+void display_mode(mode_t mode);
+
 void clear_buffer(void);
 
 void draw(void);
