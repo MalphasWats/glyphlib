@@ -3,7 +3,7 @@
 
 #include <avr/io.h>
 
-#define F_CPU 20000000
+#define F_CPU 16000000
 
 #define ever ;;
 
@@ -66,7 +66,7 @@
 #define SCREEN_COLUMNS  16
 #define SCREEN_ROWS     8
 
-#define NOTE_DURATION_MULTIPLIER 18    // ~1ms
+#define NOTE_DURATION_MULTIPLIER 15    // ~1ms
 
 typedef unsigned char bool;
 

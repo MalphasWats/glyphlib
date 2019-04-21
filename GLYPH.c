@@ -55,12 +55,13 @@ void initialise( void )
     .--------.--------.--------.--------.--------.--------------------------.
     | FOC0A  | FOC0B  |        |        | WGM02  |          CS0[2:0]        |
     '--------'--------'--------'--------'--------'--------------------------' */
-    TCCR0B = 0b00000100;  // 1/256 CLK Prescale.
+    //TCCR0B = 0b00000100;  // 1/256 CLK Prescale.
+    TCCR0B = 0b00000011;
 
                  //                     F_CPU   Prescale  Timer frequency (1 ms)
     //OCR0A = 125; // Set compare value (8000000Hz / 64) / 1000Hz
-    //OCR0A = 250; // Set compare value (16000000Hz / 64) / 1000Hz
-    OCR0A = 78; // Set compare value (20000000Hz / 256) / 1000Hz = 78.125
+    OCR0A = 250; // Set compare value (16000000Hz / 64) / 1000Hz
+    //OCR0A = 78; // Set compare value (20000000Hz / 256) / 1000Hz = 78.125
 
 
     /* TIMSK0
