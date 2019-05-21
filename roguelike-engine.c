@@ -2,6 +2,20 @@
 
 Viewport viewport = {.x=0, .y=0};
 
+void update_engine( void )
+{
+    t = millis();
+    if (frame_timer <= t)
+    {
+        f += 1;
+        if ( f == 4 )
+        {
+            f = 0;
+        }
+        frame_timer = t+FRAME_DURATION;
+    }
+}
+
 void draw_map(const Map __memx *map)
 {
     int16_t x = viewport.x;

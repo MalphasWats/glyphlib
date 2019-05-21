@@ -3,6 +3,16 @@
 
 #include "GLYPH.h"
 
+#define FRAME_DURATION 160
+
+void (*_update)( void );
+void (*_draw)( void );
+
+uint32_t t;
+uint32_t frame_timer;
+
+uint8_t f;
+
 typedef struct Tile {
     uint8_t data[8];
     uint8_t flags;
@@ -31,6 +41,7 @@ typedef struct Viewport {
     int16_t y;
 } Viewport;
 
+void update_engine( void );
 void draw_map(const Map __memx *map);
 //void draw_sprite(Sprite *s);
 
