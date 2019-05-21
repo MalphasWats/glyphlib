@@ -22,11 +22,10 @@ typedef struct Sprite {
     int16_t x;
     int16_t y;
 
-    uint8_t width;
-    uint8_t height;
+    int8_t offset_x;
+    int8_t offset_y;
 
-    const uint8_t __flash *tile;
-    const uint8_t __flash *mask;
+    const Tile __flash *tileset;
 } Sprite;
 
 typedef struct Map {
