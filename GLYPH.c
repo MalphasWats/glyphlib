@@ -416,6 +416,10 @@ void draw_battery()
         draw_tile(&BATTERY_GLYPHS[BAT_FUL-8], &BLOCK_MASKS[OPAQUE], 15*8, 0);
     else if (voltage >= 540)
         draw_tile(&BATTERY_GLYPHS[BAT_FUL-16], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+    else if (voltage >= 510)
+        draw_tile(&BATTERY_GLYPHS[BAT_EMT+8], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+    else if (voltage < 510)
+        draw_tile(&BATTERY_GLYPHS[BAT_EMT], &BLOCK_MASKS[OPAQUE], 15*8, 0);
     else //TODO: map values
         draw_int(voltage, 3, 13*8, 0);
 }
