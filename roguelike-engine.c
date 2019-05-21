@@ -30,23 +30,12 @@ void draw_map(const Map __memx *map)
     }
 }
 
-/*
+
 void draw_sprite(Sprite *s)
 {
-    uint16_t x = s->x - (s->width>>1);
-    uint16_t y = s->y - (s->height>>1);
-
-    for(uint8_t rows=0 ; rows<(s->height>>3) ; rows++)
-    {
-        for(uint8_t cols=0 ; cols<(s->width>>3) ; cols++)
-        {
-            draw_tile(s->tile + cols*8 + rows*s->width, s->mask, (x+(cols*8))-viewport.x, (y+(rows*8))-viewport.y);
-        }
-    }
-
-    //draw_tile(s->tile, s->mask, s->x-viewport.x, s->y-viewport.y);
+    draw_tile(&s->tileset[f].data[0], &BLOCK_MASKS[OPAQUE], s->x*8+s->offset_x, s->y*8+s->offset_y);
 }
-
+/*
 void center_on_sprite(Sprite *s, const Map __memx *map)
 {
     viewport.x = s->x - (SCREEN_WIDTH>>1);
@@ -62,10 +51,9 @@ void center_on_sprite(Sprite *s, const Map __memx *map)
     if (viewport.y > map->rows*8 - SCREEN_HEIGHT)
         viewport.y = map->rows*8 - SCREEN_HEIGHT;
 
-}
+}*/
 
-uint8_t tile_at_xy(const __memx Map* m, uint16_t x, uint16_t y)
+Tile get_tile_at(const __memx Map* m, uint16_t x, uint16_t y)
 {
-    return m->tiles[ (y>>3) * m->cols + (x>>3) ];
+    return m->tileset[m->tiles[ y * m->cols + x ]];
 }
-*/

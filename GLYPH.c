@@ -394,6 +394,7 @@ void click( void )
 }
 
 /* Battery */
+// 3.6v  = ~550
 // 3.76v = ~585
 // 3.90v = ~612
 // 4.17v = ~647 (charging)
@@ -412,7 +413,9 @@ void draw_battery()
     else if (voltage >= 610)
         draw_tile(&BATTERY_GLYPHS[BAT_FUL], &BLOCK_MASKS[OPAQUE], 15*8, 0);
     else if (voltage >= 570)
-        draw_tile(&BATTERY_GLYPHS[BAT_FUL-1], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+        draw_tile(&BATTERY_GLYPHS[BAT_FUL-8], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+    else if (voltage >= 540)
+        draw_tile(&BATTERY_GLYPHS[BAT_FUL-16], &BLOCK_MASKS[OPAQUE], 15*8, 0);
     else //TODO: map values
         draw_int(voltage, 3, 13*8, 0);
 }

@@ -4,6 +4,7 @@
 #include "GLYPH.h"
 
 #define FRAME_DURATION 160
+#define BUTTON_DELAY 120
 
 void (*_update)( void );
 void (*_draw)( void );
@@ -12,8 +13,6 @@ uint32_t t;
 uint32_t frame_timer;
 
 uint8_t f;
-
-Sprite player;
 
 typedef struct Tile {
     uint8_t data[8];
@@ -49,6 +48,9 @@ void draw_sprite(Sprite *s);
 
 //void center_on_sprite(Sprite *s, const Map __memx *map);
 
-//uint8_t tile_at_xy(const __memx Map* m, uint16_t x, uint16_t y);
+Tile get_tile_at(const __memx Map* m, uint16_t x, uint16_t y);
+
+Sprite player;
+
 
 #endif
