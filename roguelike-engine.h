@@ -13,6 +13,8 @@ uint32_t frame_timer;
 
 uint8_t f;
 
+Sprite player;
+
 typedef struct Tile {
     uint8_t data[8];
     uint8_t flags;
@@ -42,7 +44,8 @@ typedef struct Viewport {
 
 void update_engine( void );
 void draw_map(const Map __memx *map);
-//void draw_sprite(Sprite *s);
+
+void draw_sprite(Sprite *s);
 
 //void center_on_sprite(Sprite *s, const Map __memx *map);
 
