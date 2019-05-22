@@ -11,6 +11,7 @@ void (*_draw)( void );
 
 uint32_t t;
 uint32_t frame_timer;
+uint32_t button_timer;
 
 uint8_t f;
 
@@ -41,6 +42,7 @@ typedef struct Viewport {
     int16_t y;
 } Viewport;
 
+void init_engine( void );
 void update_engine( void );
 void draw_map(const Map __memx *map);
 
@@ -51,6 +53,8 @@ void draw_sprite(Sprite *s);
 Tile get_tile_at(const __memx Map* m, uint16_t x, uint16_t y);
 
 Sprite player;
+
+Map* map;
 
 
 #endif

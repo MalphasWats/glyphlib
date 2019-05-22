@@ -1,6 +1,17 @@
+#include <stdlib.h>
 #include "roguelike-engine.h"
 
 Viewport viewport = {.x=0, .y=0};
+
+void init_engine( void )
+{
+    frame_timer = t+FRAME_DURATION;
+    f = 0;
+
+    map = malloc(2 + 2 + 3 + 32*16);
+    map->cols = 32;
+    map->rows = 16;
+}
 
 void update_engine( void )
 {
