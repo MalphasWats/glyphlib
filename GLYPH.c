@@ -301,7 +301,7 @@ void draw_pixel(int16_t x, int16_t y)
     buffer[ (y>>3) * SCREEN_WIDTH + x ] |= 1 << (y&7);
 }
 
-void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t x, int16_t y)
+void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t x, int16_t y, bool flipped)
 {
     /* is the tile actually visible */
     if (x < -7 || x >= SCREEN_WIDTH || y < -7 || y >= SCREEN_HEIGHT)
@@ -319,12 +319,19 @@ void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t
     uint8_t y_offset_b = 8-y_offset_a;
 
     uint8_t tile_index = 0;
+    int8_t tile_dir = 1;
     uint8_t tile_width = 8;
     if (x < 0)
     {
         tile_start -= x;
         tile_index = 0-x;
         tile_width -= tile_index;
+    }
+
+    if (flipped)
+    {
+        tile_index = 8-tile_index;
+        tile_dir = -1;
     }
 
     if (x > SCREEN_WIDTH-8)
@@ -344,7 +351,7 @@ void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t
         y_offset_b = 8;
     }
 
-    for(uint8_t tile_offset=0 ; tile_offset<tile_width ; tile_offset++, tile_index++)
+    for(uint8_t tile_offset=0 ; tile_offset<tile_width ; tile_offset++, tile_index+=tile_dir)
     {
         if (y_offset_a < 8)
         {
@@ -370,7 +377,7 @@ void draw_string(const __memx char *string, int16_t x, int16_t y)
 {
     for(uint8_t i=0 ; string[i] != '\0' ; i++)
     {
-        draw_tile(&ASCII[(string[i]-32)*8], &BLOCK_MASKS[OPAQUE], x+(i*8), y);
+        draw_tile(&ASCII[(string[i]-32)*8], &BLOCK_MASKS[OPAQUE], x+(i*8), y, FALSE);
     }
 }
 
@@ -381,7 +388,7 @@ void draw_int(int16_t n, uint8_t width, int16_t x, int16_t y)
     for (uint8_t i=0 ; i<width ; i++)
     {
         n_ = (6554*(int32_t)n)>>16;
-        draw_tile(&DIGITS[(n - (n_*10))*8], &BLOCK_MASKS[OPAQUE], x+((width-i-1)*8), y);
+        draw_tile(&DIGITS[(n - (n_*10))*8], &BLOCK_MASKS[OPAQUE], x+((width-i-1)*8), y, FALSE);
         n = (int16_t)n_;
     }
 }
@@ -409,17 +416,17 @@ void draw_battery()
     //uint8_t* glyph;
 
     if (voltage >= 645)
-        draw_tile(&BATTERY_GLYPHS[BAT_CHG], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+        draw_tile(&BATTERY_GLYPHS[BAT_CHG], &BLOCK_MASKS[OPAQUE], 15*8, 0, FALSE);
     else if (voltage >= 610)
-        draw_tile(&BATTERY_GLYPHS[BAT_FUL], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+        draw_tile(&BATTERY_GLYPHS[BAT_FUL], &BLOCK_MASKS[OPAQUE], 15*8, 0, FALSE);
     else if (voltage >= 570)
-        draw_tile(&BATTERY_GLYPHS[BAT_FUL-8], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+        draw_tile(&BATTERY_GLYPHS[BAT_FUL-8], &BLOCK_MASKS[OPAQUE], 15*8, 0, FALSE);
     else if (voltage >= 540)
-        draw_tile(&BATTERY_GLYPHS[BAT_FUL-16], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+        draw_tile(&BATTERY_GLYPHS[BAT_FUL-16], &BLOCK_MASKS[OPAQUE], 15*8, 0, FALSE);
     else if (voltage >= 510)
-        draw_tile(&BATTERY_GLYPHS[BAT_EMT+8], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+        draw_tile(&BATTERY_GLYPHS[BAT_EMT+8], &BLOCK_MASKS[OPAQUE], 15*8, 0, FALSE);
     else if (voltage < 510)
-        draw_tile(&BATTERY_GLYPHS[BAT_EMT], &BLOCK_MASKS[OPAQUE], 15*8, 0);
+        draw_tile(&BATTERY_GLYPHS[BAT_EMT], &BLOCK_MASKS[OPAQUE], 15*8, 0, FALSE);
     else //TODO: map values
         draw_int(voltage, 3, 13*8, 0);
 }

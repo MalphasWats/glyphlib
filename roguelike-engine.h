@@ -24,6 +24,8 @@ typedef struct Sprite {
     int8_t dx;
     int8_t dy;
 
+    bool flipped;
+
     const Tile __flash *tileset;
 } Sprite;
 

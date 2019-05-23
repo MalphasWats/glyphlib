@@ -48,9 +48,7 @@ void draw_map()
     {
         for (uint8_t col=0 ; col<NUM_COLS ; col++)
         {
-            draw_tile(&map->tileset[map->tiles[map->cols * (row+y) + (col+x)]].data[0], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset);
-
-            //draw_tile(&map->tileset[map->tiles[map->cols * (row+y) + (col+x)]].data[0], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset);
+            draw_tile(&map->tileset[map->tiles[map->cols * (row+y) + (col+x)]].data[0], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset, FALSE);
         }
     }
 }
@@ -63,7 +61,7 @@ void draw_sprite(Sprite *s)
     x -= viewport.x*8+viewport.offset_x;
     y -= viewport.y*8+viewport.offset_y;
 
-    draw_tile(&s->tileset[f].data[0], &BLOCK_MASKS[OPAQUE], x, y);
+    draw_tile(&s->tileset[f].data[0], &BLOCK_MASKS[OPAQUE], x, y, s->flipped);
 }
 
 void move_viewport( void )
@@ -163,10 +161,12 @@ Tile check_move( void )
         }
         if ( buttons & BTN_LEFT )
         {
+            player.flipped = TRUE;
             return move_player(-1, 0);
         }
         if ( buttons & BTN_RIGHT )
         {
+            player.flipped = FALSE;
             return move_player(1, 0);
         }
     }

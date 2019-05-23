@@ -222,7 +222,7 @@ void draw(void);
 /* Draw Functions */
 
 void draw_pixel(int16_t x, int16_t y);
-void draw_tile(const uint8_t __flash *glyph, const uint8_t __flash *mask, int16_t x, int16_t y);
+void draw_tile(const uint8_t __flash *glyph, const uint8_t __flash *mask, int16_t x, int16_t y, bool flipped);
 void draw_image(const __flash Image *img, int16_t x, int16_t y);
 void draw_string(const __memx char *string, int16_t x, int16_t y);
 void draw_int(int n, uint8_t width, int16_t x, int16_t y);
