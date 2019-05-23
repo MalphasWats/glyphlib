@@ -49,8 +49,8 @@ void draw_sprite(Sprite *s);
 
 Tile get_tile_at(uint16_t x, uint16_t y);
 
-void check_move( void );
-void move_player(int8_t dx, int8_t dy);
+Tile check_move( void );
+Tile move_player(int8_t dx, int8_t dy);
 void player_walk_ani( void );
 
 void set_bump_ani(int8_t dx, int8_t dy);

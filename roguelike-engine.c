@@ -145,7 +145,7 @@ Tile get_tile_at(uint16_t x, uint16_t y)
     return map->tileset[map->tiles[ y * map->cols + x ]];
 }
 
-void check_move( void )
+Tile check_move( void )
 {
     if (button_timer <= t)
     {
@@ -155,24 +155,25 @@ void check_move( void )
         buttons = read_buttons();
         if ( buttons & BTN_UP )
         {
-            move_player(0, -1);
+            return move_player(0, -1);
         }
         if ( buttons & BTN_DOWN )
         {
-            move_player(0, 1);
+            return move_player(0, 1);
         }
         if ( buttons & BTN_LEFT )
         {
-            move_player(-1, 0);
+            return move_player(-1, 0);
         }
         if ( buttons & BTN_RIGHT )
         {
-            move_player(1, 0);
+            return move_player(1, 0);
         }
     }
+    return get_tile_at(player.x, player.y);
 }
 
-void move_player(int8_t dx, int8_t dy)
+Tile move_player(int8_t dx, int8_t dy)
 {
     int16_t px = player.x+dx;
     int16_t py = player.y+dy;
@@ -184,7 +185,7 @@ void move_player(int8_t dx, int8_t dy)
     {
         set_bump_ani(dx, dy);
 
-        return;
+        return get_tile_at(player.x, player.y);
     }
 
     Tile tile = get_tile_at(px, py);
@@ -200,6 +201,7 @@ void move_player(int8_t dx, int8_t dy)
         player.y = py;
         player.offset_y = -dy*8;
     }
+    return tile;
 }
 
 void set_bump_ani(int8_t dx, int8_t dy)
