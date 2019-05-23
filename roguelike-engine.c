@@ -68,10 +68,25 @@ void move_viewport( void )
 {
     if (player.x > viewport.x+SCREEN_WIDTH-3*8)
     {
-        viewport.x -= SCREEN_WIDTH-3*8;
+        viewport.x += SCREEN_WIDTH-3*8;
         viewport.offset_x = -(SCREEN_WIDTH-3*8);
     }
-    //TODO: add other directions.
+    if (player.x < viewport.x+3*8)
+    {
+        viewport.x -= SCREEN_WIDTH-3*8;
+        viewport.offset_x = SCREEN_WIDTH-3*8;
+    }
+
+    if (player.y > viewport.y+SCREEN_HEIGHT-3*8)
+    {
+        viewport.y += SCREEN_WIDTH-3*8;
+        viewport.offset_y = -(SCREEN_HEIGHT-3*8);
+    }
+    if (player.y < viewport.y+3*8)
+    {
+        viewport.y -= SCREEN_HEIGHT-3*8;
+        viewport.offset_y = SCREEN_HEIGHT-3*8;
+    }
 
     if (viewport.x < 0)
     {
