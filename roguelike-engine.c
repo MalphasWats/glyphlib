@@ -71,6 +71,29 @@ void move_viewport( void )
         viewport.x -= SCREEN_WIDTH-3*8;
         viewport.offset_x = -(SCREEN_WIDTH-3*8);
     }
+    //TODO: add other directions.
+
+    if (viewport.x < 0)
+    {
+        viewport.x = 0;
+        viewport.offset_x = 0;
+    }
+    if (viewport.y < 0)
+    {
+        viewport.y = 0;
+        viewport.offset_y = 0;
+    }
+
+    if (viewport.x > map->cols*8 - SCREEN_WIDTH)
+    {
+        viewport.x = map->cols*8 - SCREEN_WIDTH;
+        viewport.offset_x = 0;
+    }
+    if (viewport.y > map->rows*8 - SCREEN_HEIGHT)
+    {
+        viewport.y = map->rows*8 - SCREEN_HEIGHT;
+        viewport.offset_y = 0;
+    }
 
     _update = update_viewport_ani;
 }
