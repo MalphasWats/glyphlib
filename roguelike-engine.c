@@ -29,7 +29,7 @@ void update_engine( void )
     }
 }
 
-void draw_map(const Map __memx *map)
+void draw_map()
 {
     int8_t x = viewport.x;
     int8_t y = viewport.y;
@@ -137,27 +137,10 @@ void update_viewport_ani( void )
         _update = _update_return;
     }
 }
-/*
-void center_on_sprite(Sprite *s, const Map __memx *map)
+
+Tile get_tile_at(uint16_t x, uint16_t y)
 {
-    viewport.x = s->x - (SCREEN_WIDTH>>1);
-    viewport.y = s->y - (SCREEN_HEIGHT>>1);
-
-    if (viewport.x < 0)
-        viewport.x = 0;
-    if (viewport.y < 0)
-        viewport.y = 0;
-
-    if (viewport.x > map->cols*8 - SCREEN_WIDTH)
-        viewport.x = map->cols*8 - SCREEN_WIDTH;
-    if (viewport.y > map->rows*8 - SCREEN_HEIGHT)
-        viewport.y = map->rows*8 - SCREEN_HEIGHT;
-
-}*/
-
-Tile get_tile_at(const __memx Map* m, uint16_t x, uint16_t y)
-{
-    return m->tileset[m->tiles[ y * m->cols + x ]];
+    return map->tileset[map->tiles[ y * map->cols + x ]];
 }
 
 Tile check_move( void )
@@ -185,7 +168,7 @@ Tile check_move( void )
             return move_player(1, 0);
         }
     }
-    return get_tile_at(map, player.x, player.y);
+    return get_tile_at(player.x, player.y);
 }
 
 Tile move_player(int8_t dx, int8_t dy)
@@ -193,22 +176,20 @@ Tile move_player(int8_t dx, int8_t dy)
     int16_t px = player.x+dx;
     int16_t py = player.y+dy;
 
-    //TODO: make a bump animation
     _update = player_walk_ani;
 
     // Simple InBounds
     if (px < 0 || px > 15 || py < 0 || py > 7)
     {
-        player.offset_x = dx*8;
-        player.offset_y = dy*8;
-        return get_tile_at(map, player.x, player.y);
+        set_bump_ani(dx, dy);
+
+        return get_tile_at(player.x, player.y);
     }
 
-    Tile tile = get_tile_at(map, px, py);
+    Tile tile = get_tile_at(px, py);
     if (tile.flags & COLLIDE_FLAG)
     {
-        player.offset_x = dx*8;
-        player.offset_y = dy*8;
+        set_bump_ani(dx, dy);
     }
     else
     {
@@ -217,11 +198,33 @@ Tile move_player(int8_t dx, int8_t dy)
 
         player.y = py;
         player.offset_y = -dy*8;
-
-        //TODO: Player actually moved
-        //TODO: scroll the map
     }
     return tile;
+}
+
+void set_bump_ani(int8_t dx, int8_t dy)
+{
+    player.offset_x = 0;//dx*4;
+    player.offset_y = 0;//dy*4;
+    player.counter = 8;
+    player.dx = dx;
+    player.dy = dy;
+    _update = player_bump_ani;
+}
+
+void player_bump_ani( void )
+{
+    player.offset_x += player.dx;
+    player.offset_y += player.dy;
+    player.counter -= 1;
+    if (player.counter == 4)
+    {
+        player.dx *= -1;
+        player.dy *= -1;
+    }
+
+    if (player.counter == 0)
+        _update = _update_return;
 }
 
 void player_walk_ani( void )

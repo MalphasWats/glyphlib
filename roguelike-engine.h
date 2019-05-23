@@ -20,6 +20,10 @@ typedef struct Sprite {
     int8_t offset_x;
     int8_t offset_y;
 
+    int8_t counter;
+    int8_t dx;
+    int8_t dy;
+
     const Tile __flash *tileset;
 } Sprite;
 
@@ -39,17 +43,18 @@ typedef struct Viewport {
 
 void init_engine( void );
 void update_engine( void );
-void draw_map(const Map __memx *map);
+void draw_map();
 
 void draw_sprite(Sprite *s);
 
-//void center_on_sprite(Sprite *s, const Map __memx *map);
-
-Tile get_tile_at(const __memx Map* m, uint16_t x, uint16_t y);
+Tile get_tile_at(uint16_t x, uint16_t y);
 
 Tile check_move( void );
 Tile move_player(int8_t dx, int8_t dy);
 void player_walk_ani( void );
+
+void set_bump_ani(int8_t dx, int8_t dy);
+void player_bump_ani( void );
 
 void move_viewport( void );
 void update_viewport_ani( void );
