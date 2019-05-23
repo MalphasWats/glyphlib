@@ -31,10 +31,10 @@ void update_engine( void )
 
 void draw_map()
 {
-    int8_t x = viewport.x;
-    int8_t y = viewport.y;
-    uint8_t x_offset = viewport.offset_x;
-    uint8_t y_offset = viewport.offset_y;
+    int8_t x = viewport.x + (viewport.offset_x>>3);
+    int8_t y = viewport.y + (viewport.offset_y>>3);
+    uint8_t x_offset = viewport.offset_x&7;
+    uint8_t y_offset = viewport.offset_y&7;
 
     uint8_t NUM_ROWS = SCREEN_ROWS;
     if (y_offset > 0)
@@ -48,7 +48,9 @@ void draw_map()
     {
         for (uint8_t col=0 ; col<NUM_COLS ; col++)
         {
-            draw_tile(&map->tileset[map->tiles[map->cols * (row+y) + (col+x)]*8].data[0], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset);
+            draw_tile(&map->tileset[map->tiles[map->cols * (row+y) + (col+x)]].data[0], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset);
+
+            //draw_tile(&map->tileset[map->tiles[map->cols * (row+y) + (col+x)]].data[0], &BLOCK_MASKS[OPAQUE], col*8-x_offset, row*8-y_offset);
         }
     }
 }
@@ -66,26 +68,26 @@ void draw_sprite(Sprite *s)
 
 void move_viewport( void )
 {
-    if (player.x > viewport.x+SCREEN_WIDTH-3*8)
+    if (player.x > viewport.x+SCREEN_COLUMNS-3)
     {
-        viewport.x += SCREEN_WIDTH-3*8;
-        viewport.offset_x = -(SCREEN_WIDTH-3*8);
+        viewport.x += 8;
+        viewport.offset_x = -8*8;
     }
-    if (player.x < viewport.x+3*8)
+    if (player.x < viewport.x+2)
     {
-        viewport.x -= SCREEN_WIDTH-3*8;
-        viewport.offset_x = SCREEN_WIDTH-3*8;
+        viewport.x -= 8;
+        viewport.offset_x = 8*8;
     }
 
-    if (player.y > viewport.y+SCREEN_HEIGHT-3*8)
+    if (player.y > viewport.y+SCREEN_ROWS-3)
     {
-        viewport.y += SCREEN_WIDTH-3*8;
-        viewport.offset_y = -(SCREEN_HEIGHT-3*8);
+        viewport.y += 4;
+        viewport.offset_y = -4*8;
     }
-    if (player.y < viewport.y+3*8)
+    if (player.y < viewport.y+2)
     {
-        viewport.y -= SCREEN_HEIGHT-3*8;
-        viewport.offset_y = SCREEN_HEIGHT-3*8;
+        viewport.y -= 4;
+        viewport.offset_y = 4*8;
     }
 
     if (viewport.x < 0)
@@ -99,14 +101,14 @@ void move_viewport( void )
         viewport.offset_y = 0;
     }
 
-    if (viewport.x > map->cols*8 - SCREEN_WIDTH)
+    if (viewport.x > map->cols - SCREEN_COLUMNS)
     {
-        viewport.x = map->cols*8 - SCREEN_WIDTH;
+        viewport.x = map->cols - SCREEN_COLUMNS;
         viewport.offset_x = 0;
     }
-    if (viewport.y > map->rows*8 - SCREEN_HEIGHT)
+    if (viewport.y > map->rows - SCREEN_ROWS)
     {
-        viewport.y = map->rows*8 - SCREEN_HEIGHT;
+        viewport.y = map->rows - SCREEN_ROWS;
         viewport.offset_y = 0;
     }
 
@@ -143,7 +145,7 @@ Tile get_tile_at(uint16_t x, uint16_t y)
     return map->tileset[map->tiles[ y * map->cols + x ]];
 }
 
-Tile check_move( void )
+void check_move( void )
 {
     if (button_timer <= t)
     {
@@ -153,25 +155,24 @@ Tile check_move( void )
         buttons = read_buttons();
         if ( buttons & BTN_UP )
         {
-            return move_player(0, -1);
+            move_player(0, -1);
         }
         if ( buttons & BTN_DOWN )
         {
-            return move_player(0, 1);
+            move_player(0, 1);
         }
         if ( buttons & BTN_LEFT )
         {
-            return move_player(-1, 0);
+            move_player(-1, 0);
         }
         if ( buttons & BTN_RIGHT )
         {
-            return move_player(1, 0);
+            move_player(1, 0);
         }
     }
-    return get_tile_at(player.x, player.y);
 }
 
-Tile move_player(int8_t dx, int8_t dy)
+void move_player(int8_t dx, int8_t dy)
 {
     int16_t px = player.x+dx;
     int16_t py = player.y+dy;
@@ -179,11 +180,11 @@ Tile move_player(int8_t dx, int8_t dy)
     _update = player_walk_ani;
 
     // Simple InBounds
-    if (px < 0 || px > 15 || py < 0 || py > 7)
+    if (px < 0 || px >= map->cols || py < 0 || py >= map->rows)
     {
         set_bump_ani(dx, dy);
 
-        return get_tile_at(player.x, player.y);
+        return;
     }
 
     Tile tile = get_tile_at(px, py);
@@ -199,7 +200,6 @@ Tile move_player(int8_t dx, int8_t dy)
         player.y = py;
         player.offset_y = -dy*8;
     }
-    return tile;
 }
 
 void set_bump_ani(int8_t dx, int8_t dy)
