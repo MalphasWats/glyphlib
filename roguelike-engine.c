@@ -54,7 +54,7 @@ void draw_map()
 }
 
 
-void draw_sprite(Sprite *s)
+void draw_mob(Mob *s)
 {
     int16_t x = s->x*8+s->offset_x;
     int16_t y = s->y*8+s->offset_y;
@@ -143,7 +143,20 @@ Tile get_tile_at(uint16_t x, uint16_t y)
     return map->tileset[map->tiles[ y * map->cols + x ]];
 }
 
-Tile check_move( void )
+Mob* get_mob_at(uint16_t x, uint16_t y)
+{
+    for (uint8_t m=0 ; m<MAX_MOBS ; m++)
+    {
+        if (mobs[m].alive && mobs[m].x==x && mobs[m].y==y)
+        {
+            click();
+            return &mobs[m];
+        }
+    }
+    return 0;
+}
+
+CollideType check_move( void )
 {
     if (button_timer <= t)
     {
@@ -170,10 +183,11 @@ Tile check_move( void )
             return move_player(1, 0);
         }
     }
-    return get_tile_at(player.x, player.y);
+    return NONE; //get_tile_at(player.x, player.y);
 }
 
-Tile move_player(int8_t dx, int8_t dy)
+// TODO: use DIRX & DIRY
+CollideType move_player(int8_t dx, int8_t dy)
 {
     int16_t px = player.x+dx;
     int16_t py = player.y+dy;
@@ -185,13 +199,20 @@ Tile move_player(int8_t dx, int8_t dy)
     {
         set_bump_ani(dx, dy);
 
-        return get_tile_at(player.x, player.y);
+        return BOUNDS;
     }
 
-    Tile tile = get_tile_at(px, py);
-    if (tile.flags & COLLIDE_FLAG)
+    collide_tile = get_tile_at(px, py);
+    collide_mob = get_mob_at(px, py);
+    if (collide_mob != 0)
     {
         set_bump_ani(dx, dy);
+        return MOB;
+    }
+    else if (collide_tile.flags & COLLIDE_FLAG)
+    {
+        set_bump_ani(dx, dy);
+        return MAP;
     }
     else
     {
@@ -200,14 +221,14 @@ Tile move_player(int8_t dx, int8_t dy)
 
         player.y = py;
         player.offset_y = -dy*8;
+        return NONE;
     }
-    return tile;
 }
 
 void set_bump_ani(int8_t dx, int8_t dy)
 {
-    player.offset_x = 0;//dx*4;
-    player.offset_y = 0;//dy*4;
+    player.offset_x = 0;
+    player.offset_y = 0;
     player.counter = 8;
     player.dx = dx;
     player.dy = dy;
