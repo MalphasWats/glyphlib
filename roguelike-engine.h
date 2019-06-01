@@ -9,6 +9,8 @@
 #define COLLIDE_FLAG   0b10000000
 
 #define MAX_MOBS 2
+#define MAX_FLOATERS 5
+#define FLOATER_DELAY 30
 
 typedef struct Tile {
     uint8_t data[8];
@@ -28,16 +30,22 @@ typedef struct Mob {
 
     bool flipped;
 
-    const Tile __flash *tileset;
+    const __flash Tile* tileset;
 
     bool alive;
     uint8_t type;
+
+    int8_t hp;
+    int8_t max_hp;
+
+    uint8_t damage;
+    uint8_t defence;
 } Mob;
 
 typedef struct Map {
     uint16_t cols;
     uint16_t rows;
-    const Tile __flash *tileset;
+    const __flash Tile* tileset;
     uint8_t tiles[];
 } Map;
 
@@ -48,11 +56,24 @@ typedef struct Viewport {
     int8_t offset_y;
 } Viewport;
 
+typedef struct Floater {
+    uint8_t x;
+    uint8_t y;
+    uint8_t counter;
+    uint32_t timer;
+    const __flash uint8_t* tileset;
+    uint8_t value;
+} Floater;
+
 typedef enum { NONE, BOUNDS, MAP, MOB } CollideType;
 
 void init_engine( void );
 void update_engine( void );
 void draw_map();
+
+void add_floater(Floater f);
+void update_floaters( void );
+void draw_floaters( void );
 
 void draw_mob(Mob *s);
 

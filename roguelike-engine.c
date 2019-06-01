@@ -3,6 +3,8 @@
 
 Viewport viewport = {.x=0, .y=0, .offset_x=0, .offset_y=0};
 
+Floater floaters[MAX_FLOATERS];
+
 void init_engine( void )
 {
     frame_timer = t+FRAME_DURATION;
@@ -62,6 +64,52 @@ void draw_mob(Mob *s)
     y -= viewport.y*8+viewport.offset_y;
 
     draw_tile(&s->tileset[f].data[0], &BLOCK_MASKS[OPAQUE], x, y, s->flipped);
+}
+
+void add_floater(Floater f)
+{
+    for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
+    {
+        if (floaters[i].value == 0)
+        {
+            floaters[i] = f;
+            return;
+        }
+    }
+}
+
+void update_floaters( void )
+{
+    for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
+    {
+        if (floaters[i].value != 0)
+        {
+            if (floaters[i].timer <= t)
+            {
+                floaters[i].y -= 1;
+                floaters[i].timer = t+FLOATER_DELAY;
+                floaters[i].counter += 1;
+            }
+            if (floaters[i].counter > 6)
+            {
+                floaters[i].value = 0;
+            }
+        }
+    }
+}
+
+void draw_floaters( void )
+{
+    for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
+    {
+        if (floaters[i].value != 0)
+        {
+            draw_tile( &floaters[i].tileset[floaters[i].value*8],
+                       &floaters[i].tileset[(floaters[i].value+10)*8],
+                       floaters[i].x, floaters[i].y, FALSE
+                     );
+        }
+    }
 }
 
 void move_viewport( void )
