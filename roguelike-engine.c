@@ -149,7 +149,6 @@ Mob* get_mob_at(uint16_t x, uint16_t y)
     {
         if (mobs[m].alive && mobs[m].x==x && mobs[m].y==y)
         {
-            click();
             return &mobs[m];
         }
     }
@@ -202,16 +201,18 @@ CollideType move_player(int8_t dx, int8_t dy)
         return BOUNDS;
     }
 
-    collide_tile = get_tile_at(px, py);
+    Tile tile = get_tile_at(px, py);
     collide_mob = get_mob_at(px, py);
     if (collide_mob != 0)
     {
         set_bump_ani(dx, dy);
         return MOB;
     }
-    else if (collide_tile.flags & COLLIDE_FLAG)
+    else if (tile.flags & COLLIDE_FLAG)
     {
         set_bump_ani(dx, dy);
+        collide_x = px;
+        collide_y = py;
         return MAP;
     }
     else

@@ -86,7 +86,8 @@ Mob mobs[MAX_MOBS];
 
 Map* map;
 
-Tile collide_tile;
+uint8_t collide_x;
+uint8_t collide_y;
 Mob* collide_mob;
 
 
