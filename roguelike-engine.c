@@ -140,23 +140,23 @@ void draw_floaters( void )
 
 void move_viewport( void )
 {
-    if (player.x > viewport.x+SCREEN_COLUMNS-3)
+    if (player.x > viewport.x+SCREEN_COLUMNS-2)
     {
         viewport.x += 8;
         viewport.offset_x = -8*8;
     }
-    if (player.x < viewport.x+2)
+    if (player.x < viewport.x+1)
     {
         viewport.x -= 8;
         viewport.offset_x = 8*8;
     }
 
-    if (player.y > viewport.y+SCREEN_ROWS-3)
+    if (player.y > viewport.y+SCREEN_ROWS-2)
     {
         viewport.y += 4;
         viewport.offset_y = -4*8;
     }
-    if (player.y < viewport.y+2)
+    if (player.y < viewport.y+1)
     {
         viewport.y -= 4;
         viewport.offset_y = 4*8;
