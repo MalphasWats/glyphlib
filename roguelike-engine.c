@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "roguelike-engine.h"
 
 Viewport viewport = {.x=0, .y=0, .offset_x=0, .offset_y=0};
@@ -15,6 +16,28 @@ void init_engine( void )
     map = malloc(2 + 2 + 3 + 32*16);
     map->cols = 32;
     map->rows = 16;
+
+    for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
+        floaters[i].counter = 255;
+
+    /*init_windows();
+
+    sprintf(message_buffer, "TEST");
+    message = (Window){
+        .x=3,
+        .y=3,
+        .w=10,
+        .h=3,
+
+        .actions=TIMED,
+
+        .timer=t + 3000,
+
+        .content=&message_buffer[0],
+        ._callback=0,
+    };
+
+    add_window(&message);*/
 }
 
 void update_engine( void )
@@ -29,6 +52,9 @@ void update_engine( void )
         }
         frame_timer = t+FRAME_DURATION;
     }
+
+    //update_windows();
+    update_floaters();
 }
 
 void draw_map()
@@ -82,7 +108,7 @@ void update_floaters( void )
 {
     for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
     {
-        if (floaters[i].value != 0)
+        if (floaters[i].counter < 255)
         {
             if (floaters[i].timer <= t)
             {
@@ -92,7 +118,7 @@ void update_floaters( void )
             }
             if (floaters[i].counter > 6)
             {
-                floaters[i].value = 0;
+                floaters[i].counter = 255;
             }
         }
     }
@@ -102,11 +128,11 @@ void draw_floaters( void )
 {
     for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
     {
-        if (floaters[i].value != 0)
+        if (floaters[i].counter < 255)
         {
             draw_tile( &floaters[i].tileset[floaters[i].value*8],
-                       &floaters[i].tileset[(floaters[i].value+10)*8],
-                       floaters[i].x, floaters[i].y, FALSE
+                       &floaters[i].masks[(floaters[i].value)*8],
+                       floaters[i].x-viewport.x*8, floaters[i].y-viewport.y*8, FALSE
                      );
         }
     }
@@ -182,7 +208,7 @@ void update_viewport_ani( void )
 
     if ( viewport.offset_x == 0 && viewport.offset_y == 0)
     {
-        _update = _update_return;
+        _update = player_walk_ani;
     }
 }
 
@@ -203,7 +229,7 @@ Mob* get_mob_at(uint16_t x, uint16_t y)
     return 0;
 }
 
-CollideType check_move( void )
+void check_player_turn( void )
 {
     if (button_timer <= t)
     {
@@ -213,40 +239,35 @@ CollideType check_move( void )
         buttons = read_buttons();
         if ( buttons & BTN_UP )
         {
-            return move_player(0, -1);
+            move_player(0, -1);
         }
         if ( buttons & BTN_DOWN )
         {
-            return move_player(0, 1);
+            move_player(0, 1);
         }
         if ( buttons & BTN_LEFT )
         {
             player.flipped = TRUE;
-            return move_player(-1, 0);
+            move_player(-1, 0);
         }
         if ( buttons & BTN_RIGHT )
         {
             player.flipped = FALSE;
-            return move_player(1, 0);
+            move_player(1, 0);
         }
     }
-    return NONE; //get_tile_at(player.x, player.y);
 }
 
 // TODO: use DIRX & DIRY
-CollideType move_player(int8_t dx, int8_t dy)
+void move_player(int8_t dx, int8_t dy)
 {
     int16_t px = player.x+dx;
     int16_t py = player.y+dy;
-
-    _update = player_walk_ani;
 
     // Simple InBounds
     if (px < 0 || px >= map->cols || py < 0 || py >= map->rows)
     {
         set_bump_ani(dx, dy);
-
-        return BOUNDS;
     }
 
     Tile tile = get_tile_at(px, py);
@@ -254,14 +275,22 @@ CollideType move_player(int8_t dx, int8_t dy)
     if (collide_mob != 0)
     {
         set_bump_ani(dx, dy);
-        return MOB;
+
+        click();
+
+        hit_mob(&player, collide_mob);
     }
     else if (tile.flags & COLLIDE_FLAG)
     {
         set_bump_ani(dx, dy);
         collide_x = px;
         collide_y = py;
-        return MAP;
+
+        if (tile.flags & FLAG_CHEST)
+        {
+            click();
+            map->tiles[collide_y*map->cols+collide_x] += 1;
+        }
     }
     else
     {
@@ -270,8 +299,41 @@ CollideType move_player(int8_t dx, int8_t dy)
 
         player.y = py;
         player.offset_y = -dy*8;
-        return NONE;
+
+        move_viewport();
     }
+}
+
+void update_mobs( void )
+{
+    for (uint8_t m=0 ; m<MAX_MOBS ; m++)
+    {
+        if (mobs[m].alive)
+        {
+            if ( line_of_sight(mobs[m].x, mobs[m].y, player.x, player.y) )
+            {
+                if (!mobs[m].aggro)
+                {
+                    mobs[m].aggro = TRUE;
+                    add_floater((Floater){
+                        .x=mobs[m].x*8,
+                        .y=mobs[m].y*8 - 4,
+                        .counter=0,
+                        .timer=t+FLOATER_DELAY,
+                        .tileset=&STATUS_FLOATERS[0],
+                        .masks=&STATUS_FLOATER_MASKS[0],
+                        .value=FLOAT_STAT_AGGRO,
+                    });
+                }
+            }
+            else
+            {
+                mobs[m].aggro = FALSE;
+            }
+        }
+    }
+
+    _update = _update_return;
 }
 
 void set_bump_ani(int8_t dx, int8_t dy)
@@ -320,6 +382,81 @@ void player_walk_ani( void )
 
     if ( player.offset_x == 0 && player.offset_y == 0)
     {
-        move_viewport();
+        _update = update_mobs;
+    }
+}
+
+bool on_screen(uint8_t x, uint8_t y)
+{
+    return x >= viewport.x && x < viewport.x+SCREEN_COLUMNS && y >= viewport.y && y < viewport.y+SCREEN_ROWS;
+}
+
+bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
+{
+    // Are both points on-screen?
+    if (!on_screen(x1, y1) || !on_screen(x2, y2))
+        return FALSE;
+
+    int8_t dx = abs(x2-x1);
+    int8_t sx = 1;
+    if (x2 < x1)
+        sx = -1;
+
+    int8_t dy = abs(y2-y1);
+    int8_t sy = 1;
+    if (y2 < y1)
+        sy = -1;
+
+    int8_t err;
+    int8_t err2;
+
+    if (dx > dy)
+        err = dx>>1;
+    else
+        err = -(dy>>1);
+
+    while(x1 != x2 && y1 != y2)
+    {
+        Tile tile = get_tile_at(x1, y1);
+        if (tile.flags & COLLIDE_FLAG)
+        {
+            return FALSE;
+        }
+        else
+        {
+            err2 = err;
+            if (err2 > -dx)
+            {
+                err -= dy;
+                x1 += sx;
+            }
+            if (err2 < dy)
+            {
+                err += dx;
+                y1 += sy;
+            }
+        }
+    }
+    return TRUE;
+}
+
+void hit_mob(Mob* attacker, Mob* defender)
+{
+    //TODO: deal with defence
+    defender->hp -= attacker->damage;
+
+    add_floater((Floater){
+        .x=defender->x*8,
+        .y=defender->y*8 - 4,
+        .counter=0,
+        .timer=t+FLOATER_DELAY,
+        .tileset=&DAMAGE_FLOATERS[0],
+        .masks=&DAMAGE_FLOATER_MASKS[0],
+        .value=attacker->damage,
+    });
+
+    if (defender->hp <= 0)
+    {
+        defender->alive = FALSE;
     }
 }
