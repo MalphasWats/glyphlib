@@ -15,6 +15,10 @@
 #define MAX_FLOATERS 5
 #define FLOATER_DELAY 30
 
+static const __flash uint8_t SMALL_CHAR_MASK[] = {
+    0x0f, 0x0f, 0x0f, 0x0f, 0xff, 0xff, 0xff, 0xff,
+};
+
 typedef struct Tile {
     uint8_t data[8];
     uint8_t flags;
@@ -135,6 +139,9 @@ bool on_screen(uint8_t x, uint8_t y);
 bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
 void hit_mob(Mob* attacker, Mob* defender);
+
+void draw_small_string(const __memx char *string, int16_t x, int16_t y);
+void draw_small_int(int16_t n, uint8_t width, int16_t x, int16_t y);
 
 
 void (*_update)( void );

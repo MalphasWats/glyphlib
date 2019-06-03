@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "roguelike-engine.h"
+#include "ASCII-SMALL.h"
 
 Viewport viewport = {.x=0, .y=0, .offset_x=0, .offset_y=0};
 
@@ -447,5 +448,25 @@ void hit_mob(Mob* attacker, Mob* defender)
     if (defender->hp <= 0)
     {
         defender->alive = FALSE;
+    }
+}
+
+void draw_small_string(const __memx char *string, int16_t x, int16_t y)
+{
+    for(uint8_t i=0 ; string[i] != '\0' ; i++)
+    {
+        draw_tile(&SMALL_ASCII[(string[i]-32)*8], &SMALL_CHAR_MASK[0], x+(i*4), y, FALSE);
+    }
+}
+
+void draw_small_int(int16_t n, uint8_t width, int16_t x, int16_t y)
+{
+    //TODO: Negative numbers
+    int32_t n_;
+    for (uint8_t i=0 ; i<width ; i++)
+    {
+        n_ = (6554*(int32_t)n)>>16;
+        draw_tile(&SMALL_DIGITS[(n - (n_*10))*8], &SMALL_CHAR_MASK[0], x+((width-i-1)*4), y, FALSE);
+        n = (int16_t)n_;
     }
 }
