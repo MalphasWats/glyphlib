@@ -53,18 +53,18 @@ typedef struct Window {
 
     uint32_t timer;
 
-    char* content;
-
+    //char* content;
+    void (*_draw)(struct Window* w );
     void (*_callback)( uint8_t i );
 } Window;
 
 void init_windows( void );
-bool add_window(Window* w);
+bool show_window(Window* w);
 void update_windows( void );
 void draw_windows( void );
 void draw_window(Window* w);
 
 Window* windows[MAX_WINDOWS];
-Window* focus_window;
+//Window* focus_window;
 
 #endif

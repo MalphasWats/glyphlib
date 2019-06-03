@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include "roguelike-engine.h"
 
 Viewport viewport = {.x=0, .y=0, .offset_x=0, .offset_y=0};
@@ -20,27 +19,10 @@ void init_engine( void )
     for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
         floaters[i].counter = 255;
 
-    /*init_windows();
-
-    sprintf(message_buffer, "TEST");
-    message = (Window){
-        .x=3,
-        .y=3,
-        .w=10,
-        .h=3,
-
-        .actions=TIMED,
-
-        .timer=t + 3000,
-
-        .content=&message_buffer[0],
-        ._callback=0,
-    };
-
-    add_window(&message);*/
+    init_windows();
 }
 
-void update_engine( void )
+void gameloop( void )
 {
     t = millis();
     if (frame_timer <= t)
@@ -53,8 +35,15 @@ void update_engine( void )
         frame_timer = t+FRAME_DURATION;
     }
 
-    //update_windows();
+    update_windows();
     update_floaters();
+
+    _update();
+
+    _draw();
+    draw_floaters();
+    draw_windows();
+    draw();
 }
 
 void draw_map()

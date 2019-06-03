@@ -2,7 +2,7 @@
 #define ROGUELIKE_ENGINE_H
 
 #include "GLYPH.h"
-//#include "ui.h"
+#include "ui.h"
 
 #define FRAME_DURATION 160
 #define BUTTON_DELAY 120
@@ -109,7 +109,8 @@ static const __flash uint8_t STATUS_FLOATER_MASKS[] = {
 #define FLOAT_STAT_AGGRO 0*8
 
 void init_engine( void );
-void update_engine( void );
+void gameloop( void );
+
 void draw_map();
 
 void add_floater(Floater f);

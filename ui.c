@@ -8,7 +8,7 @@ void init_windows( void )
     }
 }
 
-bool add_window(Window* w)
+bool show_window(Window* w)
 {
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
@@ -25,9 +25,9 @@ void update_windows( void )
 {
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
-        if (windows[i]->timer <= millis())
+        if (windows[i] != 0 && windows[i]->timer <= millis() && windows[i]->actions == TIMED)
         {
-            windows[i]->timer = 0;
+            windows[i] = 0; //->timer = 0;
         }
     }
 }
@@ -36,7 +36,7 @@ void draw_windows( void )
 {
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
-        if (windows[i]->timer != 0)
+        if (windows[i] != 0)
         {
             draw_window(windows[i]);
         }
@@ -73,5 +73,6 @@ void draw_window(Window* w)
         }
     }
     //TODO: deal with \n in content
-    draw_string(w->content, (w->x+1)*8, (w->y+1)*8);
+    w->_draw(w);
+    //draw_string(w->content, (w->x+1)*8, (w->y+1)*8);
 }
