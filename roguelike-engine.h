@@ -142,7 +142,7 @@ void hit_mob(Mob* attacker, Mob* defender);
 
 void draw_small_string(const __memx char *string, int16_t x, int16_t y);
 void draw_small_int(int16_t n, uint8_t width, int16_t x, int16_t y);
-
+uint8_t num_digits(int16_t n);
 
 void (*_update)( void );
 void (*_draw)( void );

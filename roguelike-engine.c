@@ -462,6 +462,8 @@ void draw_small_string(const __memx char *string, int16_t x, int16_t y)
 void draw_small_int(int16_t n, uint8_t width, int16_t x, int16_t y)
 {
     //TODO: Negative numbers
+    if (width == 0)
+        width = num_digits(n);
     int32_t n_;
     for (uint8_t i=0 ; i<width ; i++)
     {
@@ -469,4 +471,18 @@ void draw_small_int(int16_t n, uint8_t width, int16_t x, int16_t y)
         draw_tile(&SMALL_DIGITS[(n - (n_*10))*8], &SMALL_CHAR_MASK[0], x+((width-i-1)*4), y, FALSE);
         n = (int16_t)n_;
     }
+}
+
+uint8_t num_digits(int16_t n)
+{
+    //TODO: negative numbers
+    if (n < 10)
+        return 1;
+    if (n < 100)
+        return 2;
+    if (n < 1000)
+        return 3;
+    if (n < 10000)
+        return 4;
+    return 5;
 }
