@@ -5,7 +5,7 @@
 #include "ui.h"
 
 #define FRAME_DURATION 160
-#define BUTTON_DELAY 120
+#define BUTTON_DELAY 150
 
 #define COLLIDE_FLAG    0b10000000
 #define EXIT_DOWN_FLAG  0b00000001
@@ -17,6 +17,11 @@
 
 static const __flash uint8_t SMALL_CHAR_MASK[] = {
     0x0f, 0x0f, 0x0f, 0x0f, 0xff, 0xff, 0xff, 0xff,
+};
+
+static const __flash uint8_t INV_BRACKETS[] = {
+    0xfc, 0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+    0x3f, 0x40, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
 };
 
 typedef struct Tile {
@@ -143,6 +148,9 @@ void hit_mob(Mob* attacker, Mob* defender);
 void draw_small_string(const __memx char *string, int16_t x, int16_t y);
 void draw_small_int(int16_t n, uint8_t width, int16_t x, int16_t y);
 uint8_t num_digits(int16_t n);
+
+void update_inventory( void );
+void draw_inventory( Window* w );
 
 void (*_update)( void );
 void (*_draw)( void );

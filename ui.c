@@ -8,8 +8,13 @@ void init_windows( void )
     }
 }
 
-bool show_window(Window* w)
+bool show_window(Window* w, uint16_t lifetime)
 {
+    if (lifetime > 0)
+        w->timer = millis() + lifetime;
+    else
+        w->timer = 0;
+
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
         if (windows[i] == 0)
@@ -21,13 +26,18 @@ bool show_window(Window* w)
     return FALSE;
 }
 
+void close_window(Window* w)
+{
+    w->timer = 1;
+}
+
 void update_windows( void )
 {
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
-        if (windows[i] != 0 && windows[i]->timer <= millis() && windows[i]->actions == TIMED)
+        if (windows[i] != 0 && windows[i]->timer > 0 && windows[i]->timer <= millis())
         {
-            windows[i] = 0; //->timer = 0;
+            windows[i] = 0;
         }
     }
 }

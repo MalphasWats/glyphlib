@@ -6,6 +6,8 @@ Viewport viewport = {.x=0, .y=0, .offset_x=0, .offset_y=0};
 
 Floater floaters[MAX_FLOATERS];
 
+Window win_inventory;
+
 void init_engine( void )
 {
     frame_timer = t+FRAME_DURATION;
@@ -21,6 +23,20 @@ void init_engine( void )
         floaters[i].counter = 255;
 
     init_windows();
+
+    win_inventory = (Window){
+        .x=3,
+        .y=0,
+        .w=10,
+        .h=8,
+
+//        .actions=CHOOSE,
+
+//        .timer=0,
+
+        ._draw=draw_inventory,
+//        ._callback=0,
+    };
 }
 
 void gameloop( void )
@@ -245,6 +261,14 @@ void check_player_turn( void )
             player.flipped = FALSE;
             move_player(1, 0);
         }
+
+        if ( buttons & BTN_B )
+        {
+            _update = update_inventory;
+            //TODO: ugly hack
+            //win_inventory.actions = CHOOSE;
+            show_window(&win_inventory, FIXED);
+        }
     }
 }
 
@@ -405,8 +429,11 @@ bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
     else
         err = -(dy>>1);
 
-    while(x1 != x2 && y1 != y2)
+    //while(x1 != x2 && y1 != y2)
+    for(ever)
     {
+        if (x1 == x2 && y1 == y2)
+            return TRUE;
         Tile tile = get_tile_at(x1, y1);
         if (tile.flags & COLLIDE_FLAG)
         {
@@ -485,4 +512,66 @@ uint8_t num_digits(int16_t n)
     if (n < 10000)
         return 4;
     return 5;
+}
+
+void update_inventory( void )
+{
+    if (button_timer <= t)
+    {
+        button_timer = t+BUTTON_DELAY;
+
+        uint8_t buttons;
+        buttons = read_buttons();
+        if ( buttons & BTN_UP )
+        {
+
+        }
+        if ( buttons & BTN_DOWN )
+        {
+
+        }
+        if ( buttons & BTN_LEFT )
+        {
+
+        }
+        if ( buttons & BTN_RIGHT )
+        {
+
+        }
+
+        if ( buttons & BTN_B )
+        {
+            click();
+            //TODO: ugly hack
+            //win_inventory.actions = TIMED;
+            //win_inventory.timer = t+10;
+            close_window(&win_inventory);
+            _update = _update_return;
+        }
+    }
+}
+
+void draw_inventory( Window* w )
+{
+    draw_tile(&BUTTON_GLYPHS[BTN_GLYPH_B], &BLOCK_MASKS[BUTTON_GLYPH], 11*8, 0, FALSE);
+
+    draw_tile(&BUTTON_GLYPHS[BTN_GLYPH_A], &BLOCK_MASKS[BUTTON_GLYPH], 4*8, 7*8, FALSE);
+    draw_tile(&BUTTON_GLYPHS[BTN_GLYPH_C], &BLOCK_MASKS[BUTTON_GLYPH], 5*8, 7*8, FALSE);
+    draw_tile(&BUTTON_GLYPHS[BTN_GLYPH_D], &BLOCK_MASKS[BUTTON_GLYPH], 7*8, 7*8, FALSE);
+
+    draw_small_string("ATK:", 5*8, 1*8+2);
+    draw_small_string("DEF:", 9*8, 1*8+2);
+
+    draw_small_int(player.damage, 0, 7*8, 1*8+2);
+    draw_small_int(player.defence, 0, 11*8, 1*8+2);
+
+    draw_tile(&INV_BRACKETS[0], &BLOCK_MASKS[OPAQUE], 5*8, 2*8, FALSE);
+    draw_tile(&INV_BRACKETS[0], &BLOCK_MASKS[OPAQUE], 6*8, 2*8, TRUE);
+    draw_tile(&INV_BRACKETS[8], &BLOCK_MASKS[OPAQUE], 5*8, 3*8, FALSE);
+    draw_tile(&INV_BRACKETS[8], &BLOCK_MASKS[OPAQUE], 6*8, 3*8, TRUE);
+
+    draw_tile(&INV_BRACKETS[0], &BLOCK_MASKS[OPAQUE], 9*8, 2*8, FALSE);
+    draw_tile(&INV_BRACKETS[0], &BLOCK_MASKS[OPAQUE], 10*8, 2*8, TRUE);
+    draw_tile(&INV_BRACKETS[8], &BLOCK_MASKS[OPAQUE], 9*8, 3*8, FALSE);
+    draw_tile(&INV_BRACKETS[8], &BLOCK_MASKS[OPAQUE], 10*8, 3*8, TRUE);
 }

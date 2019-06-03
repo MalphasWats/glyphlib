@@ -40,7 +40,11 @@ static const __flash uint8_t WINDOW_TILE_MASKS[] = {
 #define WIN_T 8*8
 
 
-typedef enum { FIXED, TIMED, DISMISS, CHOOSE } WindowActions;
+//typedef enum { FIXED, TIMED, DISMISS, CHOOSE } WindowActions;
+
+#define FIXED           0
+#define THREE_SECONDS   3000
+#define FIVE_SECONDS    5000
 
 typedef struct Window {
     int8_t x;
@@ -49,17 +53,14 @@ typedef struct Window {
     int8_t w;
     int8_t h;
 
-    WindowActions actions;
-
     uint32_t timer;
 
-    //char* content;
     void (*_draw)(struct Window* w );
-    void (*_callback)( uint8_t i );
 } Window;
 
 void init_windows( void );
-bool show_window(Window* w);
+bool show_window(Window* w, uint16_t lifetime);
+void close_window(Window* w);
 void update_windows( void );
 void draw_windows( void );
 void draw_window(Window* w);
