@@ -330,7 +330,7 @@ void draw_tile(const uint8_t __flash *tile, const uint8_t __flash *mask, int16_t
 
     if (flipped)
     {
-        tile_index = 8-tile_index;
+        tile_index = 7-tile_index;
         tile_dir = -1;
     }
 
