@@ -265,8 +265,6 @@ void check_player_turn( void )
         if ( buttons & BTN_B )
         {
             _update = update_inventory;
-            //TODO: ugly hack
-            //win_inventory.actions = CHOOSE;
             show_window(&win_inventory, FIXED);
         }
     }
@@ -429,7 +427,6 @@ bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
     else
         err = -(dy>>1);
 
-    //while(x1 != x2 && y1 != y2)
     for(ever)
     {
         if (x1 == x2 && y1 == y2)
@@ -542,9 +539,6 @@ void update_inventory( void )
         if ( buttons & BTN_B )
         {
             click();
-            //TODO: ugly hack
-            //win_inventory.actions = TIMED;
-            //win_inventory.timer = t+10;
             close_window(&win_inventory);
             _update = _update_return;
         }
