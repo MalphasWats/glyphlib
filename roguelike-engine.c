@@ -15,9 +15,10 @@ void init_engine( void )
 
     button_timer = 0;
 
-    map = malloc(2 + 2 + 3 + 32*16);
-    map->cols = 32;
-    map->rows = 16;
+    map = malloc(2 + 2 + 3 + MAP_COLS_MAX*MAP_ROWS_MAX);
+
+    for (uint8_t m=0 ; m<MAX_MOBS ; m++)
+        mobs[m].alive = FALSE;
 
     for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
         floaters[i].counter = 255;
@@ -29,13 +30,7 @@ void init_engine( void )
         .y=0,
         .w=10,
         .h=8,
-
-//        .actions=CHOOSE,
-
-//        .timer=0,
-
         ._draw=draw_inventory,
-//        ._callback=0,
     };
 }
 
@@ -58,6 +53,7 @@ void gameloop( void )
     _update();
 
     _draw();
+
     draw_floaters();
     draw_windows();
     draw();

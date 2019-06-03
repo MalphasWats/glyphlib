@@ -15,6 +15,10 @@
 #define MAX_FLOATERS 5
 #define FLOATER_DELAY 30
 
+#define MAP_COLS_MAX 32
+#define MAP_ROWS_MAX 16
+
+
 static const __flash uint8_t SMALL_CHAR_MASK[] = {
     0x0f, 0x0f, 0x0f, 0x0f, 0xff, 0xff, 0xff, 0xff,
 };
