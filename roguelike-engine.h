@@ -11,6 +11,8 @@
 #define EXIT_DOWN_FLAG  0b00000001
 #define FLAG_CHEST      0b00000010
 
+#define MAX_INVENTORY 8
+
 #define MAX_MOBS 2
 #define MAX_FLOATERS 5
 #define FLOATER_DELAY 30
@@ -20,13 +22,17 @@
 
 
 static const __flash uint8_t SMALL_CHAR_MASK[] = {
-    0x0f, 0x0f, 0x0f, 0x0f, 0xff, 0xff, 0xff, 0xff,
+    0xf0, 0xf0, 0xf0, 0xf0, 0xff, 0xff, 0xff, 0xff,
 };
 
 static const __flash uint8_t INV_BRACKETS[] = {
     0xfc, 0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x3f, 0x40, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+
+    0xe7, 0x81, 0x81, 0x00, 0x00, 0x81, 0x81, 0xe7, // Cursor
 };
+
+#define CURSOR 16
 
 typedef struct Tile {
     uint8_t data[8];
@@ -61,6 +67,22 @@ typedef struct Mob {
     uint8_t ty;
     bool aggro;
 } Mob;
+
+typedef enum { FOOD, WEAPON, ARMOUR } ItemType;
+
+typedef struct Item {
+    //const __flash char* name[17];
+    char name[17];
+    uint8_t tile[8];
+    ItemType type;
+    int8_t value;
+    uint8_t rarity;
+} Item;
+
+typedef struct LootTable {
+    uint8_t num_items;
+    Item items[];
+} LootTable;
 
 typedef struct Map {
     uint16_t cols;
@@ -155,6 +177,7 @@ uint8_t num_digits(int16_t n);
 
 void update_inventory( void );
 void draw_inventory( Window* w );
+void give_item(const __flash Item* item);
 
 void (*_update)( void );
 void (*_draw)( void );
@@ -175,6 +198,7 @@ Mob player;
 Mob mobs[MAX_MOBS];
 
 Map* map;
+const LootTable* loot_table;
 
 uint8_t collide_x;
 uint8_t collide_y;

@@ -7,6 +7,9 @@ Viewport viewport = {.x=0, .y=0, .offset_x=0, .offset_y=0};
 Floater floaters[MAX_FLOATERS];
 
 Window win_inventory;
+const __flash Item* inventory_slots[MAX_INVENTORY];
+
+int8_t inventory_cursor;
 
 void init_engine( void )
 {
@@ -32,6 +35,10 @@ void init_engine( void )
         .h=8,
         ._draw=draw_inventory,
     };
+
+    for (uint8_t i=0 ; i<MAX_INVENTORY ; i++)
+        inventory_slots[i] = 0;
+    inventory_cursor = 2;
 }
 
 void gameloop( void )
@@ -517,19 +524,39 @@ void update_inventory( void )
         buttons = read_buttons();
         if ( buttons & BTN_UP )
         {
-
+            if (inventory_cursor <= 4)
+                inventory_cursor = 0;
+            else
+                inventory_cursor = 1;
         }
         if ( buttons & BTN_DOWN )
         {
-
+            if (inventory_cursor <= 1)
+                inventory_cursor = 2;
+            else
+                inventory_cursor = 7;
         }
         if ( buttons & BTN_LEFT )
         {
-
+            inventory_cursor -= 1;
         }
         if ( buttons & BTN_RIGHT )
         {
+            inventory_cursor += 1;
+        }
 
+        if (inventory_cursor < 0)
+            inventory_cursor = 0;
+        if (inventory_cursor > 7)
+            inventory_cursor = 7;
+
+        if (inventory_slots[0] != 0)
+        {
+            player.damage = 1 + inventory_slots[0]->value;
+        }
+        if (inventory_slots[1] != 0)
+        {
+            player.defence = inventory_slots[1]->value;
         }
 
         if ( buttons & BTN_B )
@@ -537,6 +564,28 @@ void update_inventory( void )
             click();
             close_window(&win_inventory);
             _update = _update_return;
+        }
+        if ( buttons & BTN_A )
+        {
+            if (inventory_slots[inventory_cursor] != 0)
+            {
+                if (inventory_slots[inventory_cursor]->type == WEAPON)
+                {
+                    const __flash Item* tmp=inventory_slots[inventory_cursor];
+                    inventory_slots[inventory_cursor] = inventory_slots[0];
+                    inventory_slots[0]=tmp;
+                }
+                if (inventory_slots[inventory_cursor]->type == ARMOUR)
+                {
+                    const __flash Item* tmp=inventory_slots[inventory_cursor];
+                    inventory_slots[inventory_cursor] = inventory_slots[1];
+                    inventory_slots[1]=tmp;
+                }
+            }
+        }
+        if ( buttons & BTN_D )
+        {
+            inventory_slots[inventory_cursor] = 0;
         }
     }
 }
@@ -564,4 +613,67 @@ void draw_inventory( Window* w )
     draw_tile(&INV_BRACKETS[0], &BLOCK_MASKS[OPAQUE], 10*8, 2*8, TRUE);
     draw_tile(&INV_BRACKETS[8], &BLOCK_MASKS[OPAQUE], 9*8, 3*8, FALSE);
     draw_tile(&INV_BRACKETS[8], &BLOCK_MASKS[OPAQUE], 10*8, 3*8, TRUE);
+
+    uint8_t cx, cy;
+
+    for (uint8_t i=0 ; i<MAX_INVENTORY ; i++)
+    {
+
+        if (i == 0)
+        {
+            cx = 5*8+4;
+            cy = 3*8-4;
+        }
+        else if (i == 1)
+        {
+            cx = 9*8+4;
+            cy = 3*8-4;
+        }
+        else
+        {
+            cx = (3+i)*8;
+            cy = 5*8;
+        }
+        if (inventory_slots[i] != 0)
+            draw_tile(&inventory_slots[i]->tile[0], &BLOCK_MASKS[OPAQUE], cx, cy, FALSE);
+        if (i == inventory_cursor)
+            draw_tile(&INV_BRACKETS[CURSOR], &BLOCK_MASKS[TRANSPARENT], cx, cy, FALSE);
+    }
+
+    /*if (inventory_cursor == 0)
+    {
+        cx = 5*8+4;
+        cy = 3*8-4;
+    }
+    else if (inventory_cursor == 1)
+    {
+        cx = 9*8+4;
+        cy = 3*8-4;
+    }
+    else
+    {
+        cx = (3+inventory_cursor)*8;
+        cy = 5*8;
+    }
+    draw_tile(&INV_BRACKETS[CURSOR], &BLOCK_MASKS[TRANSPARENT], cx, cy, FALSE);*/
+
+    if (inventory_slots[inventory_cursor] != 0)
+    {
+        draw_small_string(inventory_slots[inventory_cursor]->name, 4*8, 6*8+2);
+    }
+}
+
+void give_item(const __flash Item* item)
+{
+    // First 2 slots are special.
+    for (uint8_t i=2 ; i<MAX_INVENTORY ; i++)
+    {
+        if (inventory_slots[i] == 0)
+        {
+            inventory_slots[i] = item;
+            break;
+            //TODO: message item name
+        }
+        //TODO: else message "inventory full"
+    }
 }
