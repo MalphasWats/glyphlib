@@ -179,6 +179,9 @@ void update_inventory( void );
 void draw_inventory( Window* w );
 void give_item(const __flash Item* item);
 
+void show_message(char* message);
+void draw_message_window(Window* w);
+
 void (*_update)( void );
 void (*_draw)( void );
 

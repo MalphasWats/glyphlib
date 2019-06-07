@@ -11,6 +11,9 @@ const __flash Item* inventory_slots[MAX_INVENTORY];
 
 int8_t inventory_cursor;
 
+Window message_window;
+char message_buffer[24];
+
 void init_engine( void )
 {
     frame_timer = t+FRAME_DURATION;
@@ -270,6 +273,8 @@ void check_player_turn( void )
             _update = update_inventory;
             show_window(&win_inventory, FIXED);
         }
+        if (buttons & BTN_D)
+        show_window(&message_window, THREE_SECONDS);
     }
 }
 
@@ -305,6 +310,8 @@ void move_player(int8_t dx, int8_t dy)
         {
             click();
             map->tiles[collide_y*map->cols+collide_x] += 1;
+
+            show_message("Loot!");
         }
     }
     else
@@ -676,4 +683,34 @@ void give_item(const __flash Item* item)
         }
         //TODO: else message "inventory full"
     }
+}
+
+void show_message(char* message)
+{
+    uint8_t len = 0;
+    for(uint8_t i=0 ; message[i] != '\0' ; i++)
+    {
+        message_buffer[i] = message[i];
+        len += 1;
+    }
+    message_buffer[len] = '\0';
+
+    if (len & 1)
+        len += 1;
+    len = (len>>1)+2;
+
+    message_window = (Window){
+        .x=8 - (len>>1),
+        .y=3,
+        .w=len,
+        .h=3,
+        ._draw=draw_message_window,
+    };
+
+    show_window(&message_window, THREE_SECONDS);
+}
+
+void draw_message_window(Window* w)
+{
+    draw_small_string(&message_buffer[0], (w->x+1)*8, (w->y+1)*8+2);
 }
