@@ -311,7 +311,7 @@ void move_player(int8_t dx, int8_t dy)
             click();
             map->tiles[collide_y*map->cols+collide_x] += 1;
 
-            show_message("Loot!");
+            give_item(&loot_table->items[ rng() % loot_table->num_items ]);
         }
     }
     else
@@ -321,6 +321,8 @@ void move_player(int8_t dx, int8_t dy)
 
         player.y = py;
         player.offset_y = -dy*8;
+
+        rng();
 
         move_viewport();
     }
@@ -678,14 +680,16 @@ void give_item(const __flash Item* item)
         if (inventory_slots[i] == 0)
         {
             inventory_slots[i] = item;
+            show_message(item->name);
             break;
             //TODO: message item name
         }
+        show_message("Inventory Full!");
         //TODO: else message "inventory full"
     }
 }
 
-void show_message(char* message)
+void show_message(const __memx char* message)
 {
     uint8_t len = 0;
     for(uint8_t i=0 ; message[i] != '\0' ; i++)
