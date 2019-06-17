@@ -13,7 +13,7 @@
 
 #define MAX_INVENTORY 8
 
-#define MAX_MOBS 2
+#define MAX_MOBS 8
 #define MAX_FLOATERS 5
 #define FLOATER_DELAY 30
 
@@ -63,8 +63,8 @@ typedef struct Mob {
     uint8_t damage;
     uint8_t defence;
 
-    uint8_t tx;
-    uint8_t ty;
+//    uint8_t tx;
+//    uint8_t ty;
     bool aggro;
 } Mob;
 
@@ -160,6 +160,8 @@ void check_player_turn( void );
 void move_player(int8_t dx, int8_t dy);
 void player_walk_ani( void );
 
+void mob_move_ani( void );
+
 void set_bump_ani(int8_t dx, int8_t dy);
 void player_bump_ani( void );
 
@@ -167,6 +169,7 @@ void move_viewport( void );
 void update_viewport_ani( void );
 
 bool on_screen(uint8_t x, uint8_t y);
+uint8_t distance(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
 void hit_mob(Mob* attacker, Mob* defender);

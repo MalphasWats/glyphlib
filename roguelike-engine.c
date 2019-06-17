@@ -108,7 +108,7 @@ void add_floater(Floater f)
 {
     for (uint8_t i=0 ; i<MAX_FLOATERS ; i++)
     {
-        if (floaters[i].value == 0)
+        if (floaters[i].counter == 255)
         {
             floaters[i] = f;
             return;
@@ -295,9 +295,6 @@ void move_player(int8_t dx, int8_t dy)
     if (collide_mob != 0)
     {
         set_bump_ani(dx, dy);
-
-        click();
-
         hit_mob(&player, collide_mob);
     }
     else if (tile.flags & COLLIDE_FLAG)
@@ -334,6 +331,48 @@ void update_mobs( void )
     {
         if (mobs[m].alive)
         {
+            if (mobs[m].aggro)
+            {
+                uint8_t d;
+                uint8_t dist=255;
+                uint8_t best_dist=255;
+                uint8_t best_dir=0;
+                uint8_t mx, my;
+                for(d=0 ; d<4 ; d++)
+                {
+                    mx = mobs[m].x+DIRX[d];
+                    my = mobs[m].y+DIRY[d];
+
+                    if ( player.x == mx && player.y == my )
+                    {
+                        hit_mob(&mobs[m], &player);
+                        _update = _update_return;
+                        return;
+                    }
+                    Tile tile = get_tile_at(mx, my);
+                    //TODO: make sure the new place still allows for LoS?
+                    if (!(tile.flags & COLLIDE_FLAG))
+                    {
+                        dist = distance(player.x, player.y, mx, my);
+                        if (dist < best_dist)
+                        {
+                            best_dist = dist;
+                            best_dir = d;
+                        }
+                    }
+                }
+                mobs[m].x += DIRX[best_dir];
+                mobs[m].y += DIRY[best_dir];
+
+                mobs[m].offset_x = -8*DIRX[best_dir];
+                mobs[m].offset_y = -8*DIRY[best_dir];
+
+                if (best_dist == 1)
+                {
+                    hit_mob(&mobs[m], &player);
+                }
+            }
+
             if ( line_of_sight(mobs[m].x, mobs[m].y, player.x, player.y) )
             {
                 if (!mobs[m].aggro)
@@ -357,7 +396,8 @@ void update_mobs( void )
         }
     }
 
-    _update = _update_return;
+    //_update = _update_return;
+    _update = mob_move_ani;
 }
 
 void set_bump_ani(int8_t dx, int8_t dy)
@@ -410,9 +450,60 @@ void player_walk_ani( void )
     }
 }
 
+void mob_move_ani( void )
+{
+    bool mobs_moved = FALSE;
+    for (uint8_t m=0 ; m<MAX_MOBS ; m++)
+    {
+        if (mobs[m].alive)
+        {
+            if ( mobs[m].offset_x < 0 )
+            {
+                mobs[m].offset_x += 1;
+                mobs_moved = TRUE;
+            }
+            if ( mobs[m].offset_x > 0 )
+            {
+                mobs[m].offset_x -= 1;
+                mobs_moved = TRUE;
+            }
+            if ( mobs[m].offset_y < 0 )
+            {
+                mobs[m].offset_y += 1;
+                mobs_moved = TRUE;
+            }
+            if ( mobs[m].offset_y > 0 )
+            {
+                mobs[m].offset_y -= 1;
+                mobs_moved = TRUE;
+            }
+        }
+    }
+
+    if (!mobs_moved)
+    {
+        //check_mob_attacks();
+        _update = _update_return;
+    }
+}
+
 bool on_screen(uint8_t x, uint8_t y)
 {
     return x >= viewport.x && x < viewport.x+SCREEN_COLUMNS && y >= viewport.y && y < viewport.y+SCREEN_ROWS;
+}
+
+uint8_t distance(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
+{
+    if (x1<x2)
+        x1 = x2-x1;
+    else
+        x1 = x1-x2;
+
+    if (y1<y2)
+        y1 = y2-y1;
+    else
+        y1 = y1-y2;
+    return x1+y1;
 }
 
 bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
@@ -484,6 +575,13 @@ void hit_mob(Mob* attacker, Mob* defender)
     if (defender->hp <= 0)
     {
         defender->alive = FALSE;
+        //TODO: play dead sound
+        click();
+    }
+    else
+    {
+        //TODO: play hit sound
+        click();
     }
 }
 
