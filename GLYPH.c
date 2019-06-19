@@ -121,6 +121,8 @@ void initialise( void )
 
     sei();                  // Enable interrupts
 
+    set_LED_brightness(BOTH, 200);
+
     play_tune(&STARTUP_CHIME);
 
     /* Setup Display */
@@ -128,7 +130,11 @@ void initialise( void )
 
     draw_image(&LOGO, 16, 2);
     draw();
-    delay_ms(SPLASH_DELAY);
+    for(uint8_t i=0 ; i<5 ; i++)
+    {
+        delay_ms(SPLASH_DELAY/5);
+        set_LED_brightness(BOTH, 200-50*i);
+    }
 
     /* Get Battery Voltage */
     draw_battery();
